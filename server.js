@@ -3,12 +3,13 @@ const express = require("express")
 const mysql = require("mysql")
 const bcrypt = require("bcrypt")
 const BodyParser = require("body-parser")
-const app = express();
+const app = express()
 
 // use exvpress dan bodyparser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(BodyParser.urlencoded({ extended: true }))
+
 
 // set template engine
 app.set("view engine", "ejs")
@@ -39,10 +40,10 @@ db.connect((err) => {
     
     // Insert database
     app.post("/tambah", (req, res) => {
-      const insertSql = `INSERT INTO user (nama, kelas) VALUES ('${req.body.nama}', '${req.body.kelas}');`
+      const insertSql = `INSERT INTO user (nama, kelas) VALUES ('${req.body.nama}', '${req.body.kelas}')`
       db.query(insertSql, (err, result) => {
         if (err) throw err
-        res.redirect("/main");
+        res.redirect("/main")
       })
     })
     
@@ -56,7 +57,7 @@ db.connect((err) => {
       const id = req.params.id
       db.query(updateSql, [data, id], (err, result) => {
         if (err) throw err
-        res.redirect("/main");
+        res.redirect("/main")
       })
     })
     
@@ -66,7 +67,7 @@ db.connect((err) => {
       const id = req.params.id
       db.query(deleteSql, id, (err, result) => {
         if (err) throw err
-        res.redirect("/main");
+        res.redirect("/main")
       })
     })
     
@@ -82,13 +83,14 @@ db.connect((err) => {
     })
 
     // tangkap data
-    const sql = "SELECT * FROM akun"
-    db.query(sql, (err, result) => {
-        const users = JSON.parse(JSON.stringify(result))
-        console.log("hasil database -> ", users)
-        app.get("/", (req, res) => {
-            res.render("login", { akun: users})
-        })
+    app.get("/", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const hasil = JSON.parse(JSON.stringify(result))
+        console.log("hasil -> ", hasil)
+        res.render("login", { akun: hasil})
+      })
     })
   
     // login page
@@ -98,29 +100,27 @@ db.connect((err) => {
     
       db.query("SELECT * FROM akun WHERE username = ?", [username], (err, results) => {
         if (err) {
-          console.log(err);
         } else {
-          console.log(results);
           if (results.length > 0) {
-            const hashedPassword = results[0].password;
+            const hashedPassword = results[0].password
             bcrypt.compare(password, hashedPassword, (err, isMatch) => {
               if (err) {
-                console.log(err);
+                console.log(err)
               } else if (isMatch) {
-                console.log("Login successful!");
+                console.log("Login successful!")
                 const sql = "SELECT * FROM user"
                 db.query(sql, (err, result) => {
                   const users = JSON.parse(JSON.stringify(result))
                   res.render("main", {users: users, title: "DAFTAR MAHASISWA MAGANG" })
                 })
               } else {
-                console.log("Invalid username or password.");
-                res.render("login", { error: "Invalid username or password." });
+                console.log("Invalid username or password.")
+                res.render("login", { error: "Invalid username or password." })
               }
-            });
+            })
           } else {
-            console.log("Invalid username or password.");
-            res.render("login", { error: "Invalid username or password." });
+            console.log("Invalid username or password.")
+            res.render("login", { error: "Invalid username or password." })
           }
         }
       });
