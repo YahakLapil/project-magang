@@ -5,11 +5,11 @@ const bcrypt = require("bcrypt")
 const BodyParser = require("body-parser")
 const app = express()
 
-// use exvpress dan bodyparser
+// use express dan bodyparser
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(BodyParser.urlencoded({ extended: true }))
-
+app.use(express.static('public'))
 
 // set template engine
 app.set("view engine", "ejs")
@@ -107,11 +107,16 @@ db.connect((err) => {
               if (err) {
                 console.log(err)
               } else if (isMatch) {
-                console.log("Login successful!")
-                const sql = "SELECT * FROM user"
+                // console.log("Login successful!")
+                // const sql = "SELECT * FROM user"
+                // db.query(sql, (err, result) => {
+                //   const users = JSON.parse(JSON.stringify(result))
+                //   res.render("main", {users: users, title: "DAFTAR MAHASISWA MAGANG" })
+                // })
+                const sql = "SELECT * FROM akun"
                 db.query(sql, (err, result) => {
-                  const users = JSON.parse(JSON.stringify(result))
-                  res.render("main", {users: users, title: "DAFTAR MAHASISWA MAGANG" })
+                  const Akun = JSON.parse(JSON.stringify(result))
+                  res.render("dashboard", {akun: Akun})
                 })
               } else {
                 console.log("Invalid username or password.")
