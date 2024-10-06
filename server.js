@@ -28,57 +28,69 @@ db.connect((err) => {
     if (err) throw err
     console.log('database connected...')
 
-    
-    // Read database
-    app.get("/main", (req, res) => {
-      const sql = "SELECT * FROM user"
-      db.query(sql, (err, result) => {
-        const users = JSON.parse(JSON.stringify(result))
-        res.render("main", {users: users, title: "DAFTAR MAHASISWA MAGANG" })
-      })
-    })
-    
+    // data mahasiswa
+    app.get("/data-mhs", async (req, res) => {
+      try {
+        const sqlAkun = "SELECT * FROM akun"
+        const sqlUser  = "SELECT * FROM user"
+
+        db.query(sqlAkun, (err, akunResults) => {
+          if (err) throw err
+          const akunResult = JSON.parse(JSON.stringify(akunResults))
+            db.query(sqlUser , (err, userResults) => {
+              if (err) throw err
+                const userResult = JSON.parse(JSON.stringify(userResults))
+                console.log("hasil data -> ", userResult, akunResult)
+                res.render("data-mhs", { akun: akunResult, users: userResult, title: "DAFTAR MAHASISWA MAGANG" })
+            })
+        })
+      } catch (err) {
+        console.error(err)
+        res.status(500).send("An error occurred")
+      }
+    });
+
     // Insert database
     app.post("/tambah", (req, res) => {
-      const insertSql = `INSERT INTO user (nama, kelas) VALUES ('${req.body.nama}', '${req.body.kelas}')`
-      db.query(insertSql, (err, result) => {
+      const insertSql = "INSERT INTO user (nama, kelas) VALUES (?, ?)"
+      db.query(insertSql, [req.body.nama, req.body.kelas], (err, result) => {
         if (err) throw err
-        res.redirect("/main")
+        res.redirect("/data-mhs")
       })
     })
-    
+
     // Update database
     app.post("/update/:id", (req, res) => {
-      const updateSql = "UPDATE user SET ? WHERE id = ?"
+      const updateSql = "UPDATE user SET nama = ?, kelas = ? WHERE id = ?"
       const data = {
         nama: req.body.nama,
         kelas: req.body.kelas,
       }
       const id = req.params.id
-      db.query(updateSql, [data, id], (err, result) => {
+      db.query(updateSql, [data.nama, data.kelas, id], (err, result) => {
         if (err) throw err
-        res.redirect("/main")
+        res.redirect("/data-mhs")
       })
     })
-    
+
     // Delete database
     app.get("/delete/:id", (req, res) => {
       const deleteSql = "DELETE FROM user WHERE id = ?"
       const id = req.params.id
       db.query(deleteSql, id, (err, result) => {
         if (err) throw err
-        res.redirect("/main")
+        res.redirect("/data-mhs")
       })
     })
-    
+
     // Get user by id
     app.get("/edit/:id", (req, res) => {
       const sql = "SELECT * FROM user WHERE id = ?"
       const id = req.params.id
       db.query(sql, id, (err, result) => {
         if (err) throw err
-          const userData = JSON.parse(JSON.stringify(result))[0];
-          res.render("edit", { userData: userData, judul: "EDIT MAHASISWA MAGANG" })
+        const userData = result[0]
+        res.render("edit", { userData: userData, judul: "EDIT MAHASISWA MAGANG" })
       })
     })
 
@@ -128,8 +140,18 @@ db.connect((err) => {
             res.render("login", { error: "Invalid username or password." })
           }
         }
-      });
-    });
+      })
+    })
+
+    // dashboard
+    app.get("/dashboard", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("dashboard", { akun: akun })
+      })
+    })
   })
 
 // buat localhost 3000
