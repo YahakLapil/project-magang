@@ -150,48 +150,87 @@ db.connect((err) => {
       })
     })
 
-    // tangkap data
+    // tangkap data mahasiswa dan admin
     app.get("/", (req, res) => {
-      const sql = "SELECT * FROM akun"
-      db.query(sql, (err, result) => {
-        if (err) throw err
-        const hasil = JSON.parse(JSON.stringify(result))
-        console.log("hasil -> ", hasil)
-        res.render("login", { akun: hasil})
-      })
-    })
+      const akunSql = "SELECT * FROM akun";
+      const mahasiswaSql = "SELECT * FROM mahasiswa";
+    
+      db.query(akunSql, (err, akunResults) => {
+        if (err) throw err;
+        const akunData = JSON.parse(JSON.stringify(akunResults));
+        console.log("Hasil akun -> ", akunData)
+    
+        db.query(mahasiswaSql, (err, mahasiswaResults) => {
+          if (err) throw err;
+          const mahasiswaData = JSON.parse(JSON.stringify(mahasiswaResults));
+          console.log("Hasil mahasiswa -> ", mahasiswaData)
+    
+          res.render("login", { akun: akunData, mahasiswa: mahasiswaData });
+        });
+      });
+    });
   
     // login page
     app.post("/login", (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
-    
-      db.query("SELECT * FROM akun WHERE username = ?", [username], (err, results) => {
+
+      // Cari username di database admin dan mahasiswa
+      db.query("SELECT * FROM akun WHERE username = ?", [username], (err, adminResults) => {
         if (err) {
+          console.log(err);
+        } else if (adminResults.length > 0) {
+          // Jika username ditemukan di database admin
+          const hashedPassword = adminResults[0].password;
+          bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+            if (err) {
+              console.log(err);
+            } else if (isMatch) {
+              // Jika password cocok, render dashboard admin
+              const sql = "SELECT * FROM akun";
+              db.query(sql, (err, result) => {
+                const Akun = JSON.parse(JSON.stringify(result));
+                res.render("dashboard", { akun: Akun });
+              });
+            } else {
+              // Jika password tidak cocok, render error
+              console.log("Invalid username or password.");
+              res.render("login", { error: "Invalid username or password." });
+            }
+          });
         } else {
-          if (results.length > 0) {
-            const hashedPassword = results[0].password
-            bcrypt.compare(password, hashedPassword, (err, isMatch) => {
-              if (err) {
-                console.log(err)
-              } else if (isMatch) {
-                const sql = "SELECT * FROM akun"
-                db.query(sql, (err, result) => {
-                  const Akun = JSON.parse(JSON.stringify(result))
-                  res.render("dashboard", {akun: Akun})
-                })
-              } else {
-                console.log("Invalid username or password.")
-                res.render("login", { error: "Invalid username or password." })
-              }
-            })
-          } else {
-            console.log("Invalid username or password.")
-            res.render("login", { error: "Invalid username or password." })
-          }
+          // Jika username tidak ditemukan di database admin, cari di database mahasiswa
+          db.query("SELECT * FROM mahasiswa WHERE username = ?", [username], (err, mahasiswaResults) => {
+            if (err) {
+              console.log(err);
+            } else if (mahasiswaResults.length > 0) {
+              // Jika username ditemukan di database mahasiswa
+              const hashedPassword = mahasiswaResults[0].password;
+              bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+                if (err) {
+                  console.log(err);
+                } else if (isMatch) {
+                  // Jika password cocok, render dashboard mahasiswa
+                  const sql = "SELECT * FROM mahasiswa";
+                  db.query(sql, (err, result) => {
+                    const Akun = JSON.parse(JSON.stringify(result));
+                    res.render("mahasiswa", { akun: Akun });
+                  });
+                } else {
+                  // Jika password tidak cocok, render error
+                  console.log("Invalid username or password.");
+                  res.render("login", { error: "Invalid username or password." });
+                }
+              });
+            } else {
+              // Jika username tidak ditemukan di database mahasiswa, render error
+              console.log("Invalid username or password.");
+              res.render("login", { error: "Invalid username or password." });
+            }
+          });
         }
-      })
-    })
+      });
+    });
 
     // dashboard
     app.get("/dashboard", (req, res) => {
@@ -203,11 +242,129 @@ db.connect((err) => {
       })
     })
 
+    // mahasiswa
+    app.get("/mahasiswa", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("mahasiswa", { akun: akun })
+      })
+    })
+
     // tambah
     app.get("/tambah", (req, res) => {
       if (err) throw err
       res.render("tambah")
     })
+
+    // detail
+    app.get("/detail/:id", (req, res) => {
+      const id = req.params.id
+      const sql = "SELECT * FROM user WHERE id = ?"
+      db.query(sql, id, (err, result) => {
+        if (err) throw err
+        const userData = result[0]
+        res.render("detail", { userData: userData })
+      })
+    })
+
+    // akun mahasiswa
+    app.get("/akun-mhs", (req, res) => {
+      if (err) throw err
+      res.render("akun-mhs")
+    })
+
+    // data absen
+    app.get("/data-absen", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("data-absen", { akun: akun })
+      })
+    })
+
+    // data kegiatan
+    app.get("/data-kegiatan", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("data-kegiatan", { akun: akun })
+      })
+    })
+
+    // administrator
+    app.get("/administrator", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("administrator", { akun: akun })
+      })
+    })
+    
+    // pengaturan
+    app.get("/pengaturan", (req, res) => {
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("pengaturan", { akun: akun })
+      })
+    })
+
+    // mahasiswa
+    app.get("/mahasiswa", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("mahasiswa", { akun: akun })
+      })
+    })
+
+    // absensi
+    app.get("/absensi", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("absensi", { akun: akun })
+      })
+    })
+
+    // riwayat absen
+    app.get("/riwayat-absen", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("riwayat-absen", { akun: akun })
+      })
+    })
+
+    // kegiatan
+    app.get("/kegiatan", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("kegiatan", { akun: akun })
+      })
+    })
+
+    // profil
+    app.get("/profil", (req, res) => {
+      const sql = "SELECT * FROM mahasiswa"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("profil", { akun: akun })
+      })
+    })
+
   })
 
 // buat localhost 3000

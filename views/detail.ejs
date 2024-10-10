@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Mahasiswa</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card mt-5 text-center w-50 mx-auto">
+            <div class="card-body">
+                <h3>Detail Mahasiswa</h3>
+                <p>Nama: <%= userData.nama %></p>
+                <p>Universitas: <%= userData.univ %></p>
+                <p>NIM: <%= userData.nim %></p>
+                <p>Mulai: <%= moment(userData.mulai).format("YYYY-MM-DD") %></p>
+                <p>Akhir: <%= moment(userData.akhir).format("YYYY-MM-DD") %></p>
+                <p>Foto: <br><img src="/gambar/<%= userData.id %>" alt="Foto Mahasiswa" width="100" height="100"></p>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <a class="btn btn-danger" href="/data-mhs"> Tutup</a>
+        </div>
+    </div>
+
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>
