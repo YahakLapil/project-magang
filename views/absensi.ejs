@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Absensi</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
     <style>
@@ -26,18 +26,17 @@
             <% for (let AKUN of akun) { %>
             <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= AKUN.username %></h3>
             <% } %>
-            <a class="nav-link bi-house-door-fill ms-5" href="dashboard">    Beranda</a>
-            <a class="nav-link bi-people-fill ms-5" href="data-mhs">    Data Mahasiswa</a>
-            <a class="nav-link bi-calendar-fill ms-5" href="data-absen">  Data Absensi</a>
-            <a class="nav-link bi-book-fill ms-5" href="data-kegiatan"> Data Kegiatan</a>
-            <a class="nav-link bi-person-fill ms-5" href="administrator"> Administrator</a>
-            <a class="nav-link bi-gear-fill ms-5" href="pengaturan"> Pengaturan</a>
+            <a class="nav-link bi-house-door-fill ms-5" href="mahasiswa">    Beranda</a>
+            <a class="nav-link bi-calendar-fill ms-5" href="absensi">    Absensi</a>
+            <a class="nav-link bi-arrow-counterclockwise ms-5" href="riwayat-absen">  Riwayat Absensi</a>
+            <a class="nav-link bi-book-fill ms-5" href="kegiatan"> Kegiatan Harian</a>
+            <a class="nav-link bi-person-fill ms-5" href="profil"> Profil</a>
             <a class="nav-link bi-box-arrow-left ms-5" href="/"> Logout</a>
         </nav>
         <div class="col-md-10 bg-body-secondary w-75">
-            <p class="p-3 bi-house-door-fill">  /   Beranda</p>
+            <p class="p-3 bi-calendar-fill">  /   Absensi</p>
             <div class="card">
-                <h5 class="card-header p-3">Beranda</h5>
+                <h5 class="card-header p-3">Absensi</h5>
                 <div class="card-body mt-3">
                     <h5 class="card-title">Selamat Datang, Yahak Lapil.</h5>
                     <p class="card-text">Selamat Datang di Aplikasi Absensi dan Kegiatan Harian Mahasiswa berbasis Web. Sebuah sistem yang memungkinkan para Mahasiswa PKL di Dinas Komunikasi dan Informatika Palembang untuk melakukan absensi dan mencatat kegiatan harian dari website. Sistem ini diharapkan dapat memberi kemudahan setiap Mahasiswa PKL untuk melakukan absensi dan mencatat kegiatan harian.</p>
