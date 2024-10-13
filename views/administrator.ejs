@@ -23,9 +23,7 @@
     </nav>
     <div class="row">
         <nav class="col-md-4 nav flex-column bg-dark w-25 sec-navbar">
-            <% for (let AKUN of akun) { %>
-            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= AKUN.username %></h3>
-            <% } %>
+            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= username %></h3>
             <a class="nav-link bi-house-door-fill ms-5" href="dashboard">    Beranda</a>
             <a class="nav-link bi-people-fill ms-5" href="data-mhs">    Data Mahasiswa</a>
             <a class="nav-link bi-calendar-fill ms-5" href="data-absen">  Data Absensi</a>
@@ -39,7 +37,7 @@
             <div class="card">
                 <h5 class="card-header p-3">Administrator</h5>
                 <div class="card-body mt-3">
-                    <h5 class="card-title">Selamat Datang, Yahak Lapil.</h5>
+                    <h5 class="card-title">Selamat Datang, <%= username %>.</h5>
                     <p class="card-text">Selamat Datang di Aplikasi Absensi dan Kegiatan Harian Mahasiswa berbasis Web. Sebuah sistem yang memungkinkan para Mahasiswa PKL di Dinas Komunikasi dan Informatika Palembang untuk melakukan absensi dan mencatat kegiatan harian dari website. Sistem ini diharapkan dapat memberi kemudahan setiap Mahasiswa PKL untuk melakukan absensi dan mencatat kegiatan harian.</p>
                 </div>
             </div>

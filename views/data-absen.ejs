@@ -31,9 +31,7 @@
     </nav>
     <div class="row">
         <nav class="col-md-4 nav flex-column bg-dark w-25 sec-navbar">
-            <% for (let AKUN of akun) { %>
-            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= AKUN.username %></h3>
-            <% } %>
+            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= username %></h3>
             <a class="nav-link bi-house-door-fill ms-5" href="dashboard">    Beranda</a>
             <a class="nav-link bi-people-fill ms-5" href="data-mhs">    Data Mahasiswa</a>
             <a class="nav-link bi-calendar-fill ms-5" href="data-absen">  Data Absensi</a>
@@ -42,6 +40,7 @@
             <a class="nav-link bi-gear-fill ms-5" href="pengaturan"> Pengaturan</a>
             <a class="nav-link bi-box-arrow-left ms-5" href="/"> Logout</a>
         </nav>
+
         <div class="col-md-10 bg-body-secondary w-75 data-mahasiswa">
             <p class="p-3 bi-calendar-fill">  /   Data Absensi</p>
             <div class="card">
@@ -55,7 +54,42 @@
                 </div>
               </div>
             </div>
+
+            <div class="container">
+              <h3>DATA ABSEN</h3>
+              <a class="btn btn-success bi-plus mb-3" href=""> Absensi</a>
+              <table class="table">
+                  <thead>
+                      <tr>
+                        <th scope="col">No</th>
+                        <th scope="col">Nama</th>
+                        <th scope="col">Universitas</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Waktu</th>
+                        <th scope="col">Hari</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col">Aksi</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row">
+                            <a href="" class="btn btn-success bi-clock-fill"> Absensi</a>
+                            <a href="" class="btn btn-primary bi-file-text-fill"> Cetak</a>
+                      </tr>
+                  </tbody>
+              </table>
+          </div>
+
         </div>
+
     </div>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
 </body>

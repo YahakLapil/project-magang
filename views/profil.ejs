@@ -23,9 +23,7 @@
     </nav>
     <div class="row">
         <nav class="col-md-4 nav flex-column bg-dark w-25 sec-navbar">
-            <% for (let AKUN of akun) { %>
-            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= AKUN.username %></h3>
-            <% } %>
+            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= username %></h3>
             <a class="nav-link bi-house-door-fill ms-5" href="mahasiswa">    Beranda</a>
             <a class="nav-link bi-calendar-fill ms-5" href="absensi">    Absensi</a>
             <a class="nav-link bi-arrow-counterclockwise ms-5" href="riwayat-absen">  Riwayat Absensi</a>
@@ -33,15 +31,56 @@
             <a class="nav-link bi-person-fill ms-5" href="profil"> Profil</a>
             <a class="nav-link bi-box-arrow-left ms-5" href="/"> Logout</a>
         </nav>
+
         <div class="col-md-10 bg-body-secondary w-75">
             <p class="p-3 bi-person-fill">  /   Profil</p>
             <div class="card">
-                <h5 class="card-header p-3">Profil</h5>
+                <h5 class="card-header p-3">Absensi</h5>
                 <div class="card-body mt-3">
-                    <h5 class="card-title">Selamat Datang, Yahak Lapil.</h5>
-                    <p class="card-text">Selamat Datang di Aplikasi Absensi dan Kegiatan Harian Mahasiswa berbasis Web. Sebuah sistem yang memungkinkan para Mahasiswa PKL di Dinas Komunikasi dan Informatika Palembang untuk melakukan absensi dan mencatat kegiatan harian dari website. Sistem ini diharapkan dapat memberi kemudahan setiap Mahasiswa PKL untuk melakukan absensi dan mencatat kegiatan harian.</p>
+                    <table class="table">
+                        <tbody>
+                          <tr>
+                            <th scope="row">Nama Mahasiswa</th>
+                            <td>:   Apil</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Nomor Induk Mahasiswa</th>
+                            <td>:   062230701576</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Universitas</th>
+                            <td>:   Politeknik Negeri Sriwijaya</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Jurusan</th>
+                            <td>:   IT</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Tanggal Masuk</th>
+                            <td>:   22/07/2024</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Tanggal Selesai</th>
+                            <td>:   22/10/2024</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">No Telp</th>
+                            <td>:   089620296665</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Alamat</th>
+                            <td>:   Jl. Letnan Yasin</td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Foto</th>
+                            <td>:   <img src="" width="100" height="100"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <a href="" class="btn btn-primary bi-key-fill"> Password</a>
                 </div>
             </div>
+
         </div>
     </div>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
