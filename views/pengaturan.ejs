@@ -8,10 +8,18 @@
     <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
     <style>
         .sec-navbar{
-            height: 100vh;
+          height: 100vh;
         }
         body {
-            overflow-x: hidden;
+          overflow: hidden;
+        }
+        .data-mahasiswa {
+          max-height: 100vh;
+          overflow-y: visible;
+        }
+        .data-mahasiswa .container {
+          overflow-y: auto;
+          max-height: calc(100vh - 20px);
         }
     </style>
 </head>
@@ -21,11 +29,9 @@
           <span class="navbar-brand mb-3 ms-5 h1 text-white">ABSEN ANAK MAGANG</span>
         </div>
     </nav>
-    <div class="row">
+    <div class="row data-mahasiswa">
         <nav class="col-md-4 nav flex-column bg-dark w-25 sec-navbar">
-            <% for (let AKUN of akun) { %>
-            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= AKUN.username %></h3>
-            <% } %>
+            <h3 class="ms-5 mb-3 text-white bi-person-circle">   <%= username %></h3>
             <a class="nav-link bi-house-door-fill ms-5" href="dashboard">    Beranda</a>
             <a class="nav-link bi-people-fill ms-5" href="data-mhs">    Data Mahasiswa</a>
             <a class="nav-link bi-calendar-fill ms-5" href="data-absen">  Data Absensi</a>
@@ -34,15 +40,81 @@
             <a class="nav-link bi-gear-fill ms-5" href="pengaturan"> Pengaturan</a>
             <a class="nav-link bi-box-arrow-left ms-5" href="/"> Logout</a>
         </nav>
-        <div class="col-md-10 bg-body-secondary w-75">
+        <div class="col-md-10 bg-body-secondary w-75 container">
             <p class="p-3 bi-gear-fill">  /   Pengaturan</p>
             <div class="card">
-                <h5 class="card-header p-3">Pengaturan</h5>
+                <h5 class="card-header p-3">Profil Instansi</h5>
                 <div class="card-body mt-3">
-                    <h5 class="card-title">Selamat Datang, Yahak Lapil.</h5>
-                    <p class="card-text">Selamat Datang di Aplikasi Absensi dan Kegiatan Harian Mahasiswa berbasis Web. Sebuah sistem yang memungkinkan para Mahasiswa PKL di Dinas Komunikasi dan Informatika Palembang untuk melakukan absensi dan mencatat kegiatan harian dari website. Sistem ini diharapkan dapat memberi kemudahan setiap Mahasiswa PKL untuk melakukan absensi dan mencatat kegiatan harian.</p>
+                    <form action="" method="post" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                          <label for="instansi" class="col-sm-2 col-form-label">Nama Instansi</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="instansi" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="ketua" class="col-sm-2 col-form-label">Nama Ketua (Pimpinan)</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="ketua" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="pembina" class="col-sm-2 col-form-label">Nama Pembina Magang</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="pembina" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="alamat" class="col-sm-2 col-form-label">Alamat</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="alamat" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="telp" class="col-sm-2 col-form-label">No Telp</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="telp" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="web" class="col-sm-2 col-form-label">Website</label>
+                          <div class="col-sm-10">
+                            <input type="text" name="web" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="filename" class="col-sm-2 col-form-label">Logo</label>
+                          <div class="col-sm-10">
+                            <img src="" width="100" height="100">
+                            <input type="file" name="newFilename" class="form-control" accept="image/*">
+                          </div>
+                        </div>
+                        <a href="" class="btn btn-success bi-pencil-square">Simpan Perubahan</a>
+                    </form>
                 </div>
             </div>
+
+            <div class="card mt-5 mb-5">
+                <h5 class="card-header p-3">Pengaturan Absensi</h5>
+                <div class="card-body mt-3">
+                    <form action="" method="post" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                          <label for="mulai" class="col-sm-2 col-form-label">Mulai Absensi</label>
+                          <div class="col-sm-10">
+                            <input type="time" name="mulai" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="akhir" class="col-sm-2 col-form-label">Akhir Absensi</label>
+                          <div class="col-sm-10">
+                            <input type="time" name="akhir" class="form-control" required value="">
+                          </div>
+                        </div>
+                        <a href="" class="btn btn-success bi-pencil-square">Simpan Perubahan</a>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
