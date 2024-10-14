@@ -441,6 +441,24 @@ db.connect((err) => {
       }
     })
 
+    // tambah absen
+    app.get("/tambah-absen", (req, res) => {
+      if (err) throw err
+      res.render("tambah-absen")
+    })
+
+    // tambah kegiatan
+    app.get("/tambah-kegiatan", (req, res) => {
+      if (err) throw err
+      res.render("tambah-kegiatan")
+    })
+
+    // tambah admin
+    app.get("/tambah-admin", (req, res) => {
+      if (err) throw err
+      res.render("tambah-admin")
+    })
+
   })
 
 // buat localhost 3000

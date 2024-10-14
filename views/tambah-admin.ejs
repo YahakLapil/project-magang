@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Administrator</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <div class="container">
+    <form action="/tambah" method="post" enctype="multipart/form-data">
+      <h3 class="mt-5">TAMBAH ADMINISTRATOR</h3>
+      <div class="row mb-3">
+        <label for="nama" class="col-sm-2 col-form-label">Nama Lengkap</label>
+        <div class="col-sm-10">
+          <input type="text" name="nama" class="form-control" required>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="nip" class="col-sm-2 col-form-label">Nomor Induk Pegawai (NIP)</label>
+        <div class="col-sm-10">
+          <input type="text" name="nip" class="form-control" required>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <label for="email" class="col-sm-2 col-form-label">Email</label>
+        <div class="col-sm-10">
+          <input type="email" name="email" class="form-control" required>
+        </div>
+      </div>
+      <input type="submit" class="btn btn-success" value="Simpan">
+      <button class="btn btn-warning" type="reset"> Reset</button>
+      <a class="btn btn-danger" href="/data-kegiatan"> Batal</a>
+    </form>
+  </div>
+    
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>
