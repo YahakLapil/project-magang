@@ -319,6 +319,39 @@ db.connect((err) => {
       })
     })
 
+    // tambah akun admin
+    app.post("/tambah-akun-admin", (req, res) => {
+      const username = req.body.username
+      const password = req.body.password
+
+      const sql = "SELECT * FROM akun WHERE username = ?"
+      db.query(sql, [username], (err, result) => {
+        if (err) {
+          console.error(err)
+          res.status(500).send("Error creating account")
+        } else if (result.length > 0) {
+          res.render("akun-admin", { error: "Username sudah ada"})
+        } else {
+          bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+              console.error(err)
+              res.status(500).send("Error creating account")
+            } else {
+              const sql = "INSERT INTO akun (username, password) VALUES (?, ?)"
+              db.query(sql, [username, hashedPassword], (err, result) => {
+                if (err) {
+                  console.error(err)
+                  res.status(500).send("Error creating account")
+                } else {
+                  res.redirect("/akun-admin")
+                }
+              })
+            }
+          })
+        }
+      })
+    })
+
     // data absen
     app.get("/data-absen", (req, res) => {
       if (!req.session.username) {
@@ -348,18 +381,40 @@ db.connect((err) => {
     })
 
     // administrator
+    // app.get("/administrator", (req, res) => {
+    //   if (!req.session.username) {
+    //     res.redirect("/login")
+    //   } else {
+    //     const sql = "SELECT * FROM akun"
+    //     db.query(sql, (err, result) => {
+    //       if (err) throw err
+    //       const akun = JSON.parse(JSON.stringify(result))
+    //       res.render("administrator", { akun: akun, username: req.session.username })
+    //     })
+    //   }
+    // })
     app.get("/administrator", (req, res) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM akun"
-        db.query(sql, (err, result) => {
-          if (err) throw err
-          const akun = JSON.parse(JSON.stringify(result))
-          res.render("administrator", { akun: akun, username: req.session.username })
-        })
+        const akunSql = "SELECT * FROM akun";
+        const adminSql = "SELECT * FROM administrator";
+      
+        db.query(akunSql, (err, akunResults) => {
+          if (err) throw err;
+          const akunData = JSON.parse(JSON.stringify(akunResults));
+          console.log("Hasil akun -> ", akunData)
+      
+          db.query(adminSql, (err, adminResults) => {
+            if (err) throw err;
+            const adminData = JSON.parse(JSON.stringify(adminResults));
+            console.log("Hasil admin -> ", adminData)
+      
+            res.render("administrator", { akun: akunData, admin: adminData, username: req.session.username });
+          });
+        });
       }
-    })
+    });
     
     // pengaturan
     app.get("/pengaturan", (req, res) => {
@@ -456,7 +511,35 @@ db.connect((err) => {
     // tambah admin
     app.get("/tambah-admin", (req, res) => {
       if (err) throw err
-      res.render("tambah-admin")
+        res.render("tambah-admin")
+    })
+
+    // insert tambah-admin
+    app.post("/tambah-adm", (req, res) => {
+      const sql = "INSERT INTO administrator (nama, nip, email) VALUES (?, ?, ?)"
+      
+      db.query(sql, [req.body.nama, req.body.nip, req.body.email], (err, result) => {
+        if (err) throw err
+        res.redirect("/administrator")
+      })
+    })
+
+    // mulai absen
+    app.get("/mulai-absen", (req, res) => {
+      if (err) throw err
+      res.render("mulai-absen")
+    })
+
+    // absen mhs
+    app.get("/absen-mhs", (req, res) => {
+      if (err) throw err
+      res.render("absen-mhs")
+    })
+
+    // akun admin
+    app.get("/akun-admin", (req, res) => {
+      if (err) throw err
+      res.render("akun-admin")
     })
 
   })
