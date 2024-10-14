@@ -8,10 +8,18 @@
     <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
     <style>
         .sec-navbar{
-            height: 100vh;
+          height: 100vh;
         }
         body {
-            overflow-x: hidden;
+          overflow: hidden;
+        }
+        .data-mahasiswa {
+          max-height: 100vh;
+          overflow-y: visible;
+        }
+        .data-mahasiswa .container {
+          overflow-y: auto;
+          max-height: calc(100vh - 200px);
         }
     </style>
 </head>
@@ -32,15 +40,38 @@
             <a class="nav-link bi-gear-fill ms-5" href="pengaturan"> Pengaturan</a>
             <a class="nav-link bi-box-arrow-left ms-5" href="/"> Logout</a>
         </nav>
-        <div class="col-md-10 bg-body-secondary w-75">
+
+        <div class="col-md-10 bg-body-secondary w-75 data-mahasiswa">
             <p class="p-3 bi-person-fill">  /   Administrator</p>
-            <div class="card">
-                <h5 class="card-header p-3">Administrator</h5>
-                <div class="card-body mt-3">
-                    <h5 class="card-title">Selamat Datang, <%= username %>.</h5>
-                    <p class="card-text">Selamat Datang di Aplikasi Absensi dan Kegiatan Harian Mahasiswa berbasis Web. Sebuah sistem yang memungkinkan para Mahasiswa PKL di Dinas Komunikasi dan Informatika Palembang untuk melakukan absensi dan mencatat kegiatan harian dari website. Sistem ini diharapkan dapat memberi kemudahan setiap Mahasiswa PKL untuk melakukan absensi dan mencatat kegiatan harian.</p>
-                </div>
+
+            <div class="container">
+              <h3>ADMINISTRATOR</h3>
+              <a class="btn btn-success bi-plus mb-3" href="/tambah-admin"> Tambah</a>
+              <table class="table">
+                  <thead>
+                      <tr>
+                        <th scope="col">No</th>
+                        <th scope="col">NIP</th>
+                        <th scope="col">Nama</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Aksi</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <tr>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row"></th>
+                          <th scope="row">
+                            <a href="" class="btn btn-primary bi-person-fill"></a>
+                            <a href="" class="btn btn-warning bi-pencil-square"></a>
+                            <a href="" class="btn btn-danger bi-trash-fill"></a>
+                      </tr>
+                  </tbody>
+              </table>
             </div>
+
         </div>
     </div>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
