@@ -46,9 +46,9 @@
             </div>
 
             <div class="container">
-                <a class="btn btn-success bi-plus mb-3 mt-3" href=""> Tambah</a>
+                <a class="btn btn-success bi-plus mb-3 mt-3" href="/tambah-kegiatan-mhs"> Tambah</a>
                 <a class="btn btn-primary bi-file-text-fill mb-3 mt-3" href=""> Cetak</a>
-                <table class="table">
+                <table class="table table-responsive">
                     <thead>
                         <tr>
                           <th scope="col">No</th>
@@ -59,12 +59,27 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <% let index = 1; let increment = 1; %>
+                        <% for (let kegiatann of kegiatan) { %>
                         <tr>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
+                            <th scope="row"><%= kegiatann.id %></th>
+                            <th scope="row"><%= kegiatann.hari %></th>
+                            <th scope="row"><%= moment(kegiatann.tanggal).format('DD-MM-YYYY') %></th>
+                            <th scope="row">
+                                <% const jam = kegiatann.jam.split(', '); %>
+                                <% for (let i = 0; i < jam.length; i++) { %>
+                                    <%= jam[i] %><br>
+                                <% } %>
+                            </th>
+                            <th scope="row">
+                                <% const kegiatan = kegiatann.kegiatan.split(', '); %>
+                                <% for (let i = 0; i < kegiatan.length; i++) { %>
+                                    <%= index++ %>. <%= kegiatan[i] %><br>
+                                <% } %>
+                            </th>
+                        </tr>
+                        <% increment = kegiatan.length; %>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
