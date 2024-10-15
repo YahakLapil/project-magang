@@ -63,7 +63,7 @@ db.connect((err) => {
       }
     })
 
-    // Insert database
+    // Insert database user
     app.post("/tambah", upload.any(), (req, res) => {
       const insertSql = "INSERT INTO user (nama, univ, nim, mulai, akhir, foto) VALUES (?, ?, ?, ?, ?, ?)"
       const filename = req.files[0].filename
@@ -72,6 +72,60 @@ db.connect((err) => {
       db.query(insertSql, [req.body.nama, req.body.univ, req.body.nim, req.body.mulai, req.body.akhir, filename], (err, result) => {
         if (err) throw err
         res.redirect("/data-mhs")
+      })
+    })
+
+    // Insert database kegiatan
+    app.post("/tambah-kegiatan-mhs", (req, res) => {
+      const { awal, akhir, kegiatan, id_mahasiswa } = req.body
+
+      const tanggal = moment().format("YYYY-MM-DD")
+      const hari = moment().format("dddd")
+      const jam = `${awal} - ${akhir}`
+
+      let hariIndo
+      switch (hari) {
+        case "Monday":
+          hariIndo = "Senin"
+          break
+        case "Tuesday":
+          hariIndo = "Selasa"
+          break
+        case "Wednesday":
+          hariIndo = "Rabu"
+          break
+        case "Thursday":
+          hariIndo = "Kamis"
+          break
+        case "Friday":
+          hariIndo = "Jumat"
+          break
+        case "Saturday":
+          hariIndo = "Sabtu"
+          break
+        case "Sunday":
+          hariIndo = "Minggu"
+          break
+        default:
+          hariIndo = hari
+      }
+
+      const sqlCek = "SELECT * FROM kegiatan WHERE tanggal = ? AND id_mahasiswa = ?"
+      db.query(sqlCek, [tanggal, id_mahasiswa], (err, result) => {
+        if (err) throw err
+        if (result.length > 0) {
+          const sqlUpdate = "UPDATE kegiatan SET jam = CONCAT_WS(', ', jam, ?), kegiatan = CONCAT_WS(', ', kegiatan, ?) WHERE tanggal = ? AND id_mahasiswa = ?"
+          db.query(sqlUpdate, [jam, kegiatan, tanggal, id_mahasiswa], (err, result) => {
+            if (err) throw err
+            res.redirect("/kegiatan")
+          })
+        } else {
+          const insertSql = "INSERT INTO kegiatan (hari, tanggal, jam, kegiatan, id_mahasiswa) VALUES (?, ?, ?, ?, ?)"
+          db.query(insertSql, [hariIndo, tanggal, jam, kegiatan, id_mahasiswa], (err, result) => {
+            if (err) throw err
+            res.redirect("/kegiatan")
+          })
+        }
       })
     })
 
@@ -93,7 +147,7 @@ db.connect((err) => {
       })
     })
 
-    // Update database
+    // Update database user
     app.post("/update/:id", upload.single('newFilename'), (req, res) => {
       const updateSql = "UPDATE user SET nama = ?, univ = ?, nim = ?, mulai = ?, akhir = ?, foto = ? WHERE id = ?"
       const data = {
@@ -130,7 +184,22 @@ db.connect((err) => {
       })
     })
 
-    // Delete database
+    //Update database administrator
+    app.post("/update-admin/:id", (req, res) => {
+      const updateSql = "UPDATE administrator SET nama = ?, nip = ?, email = ? WHERE id = ?"
+      const data = {
+        nama: req.body.nama,
+        nip: req.body.nip,
+        email: req.body.email,
+      }
+      const id = req.params.id
+      db.query(updateSql, [data.nama, data.nip, data.email, id], (err, result) => {
+        if (err) throw err
+        res.redirect("/administrator")
+      })
+    })
+
+    // Delete database user
     app.get("/delete/:id", (req, res) => {
       const deleteSql = "DELETE FROM user WHERE id = ?"
       const id = req.params.id
@@ -140,7 +209,17 @@ db.connect((err) => {
       })
     })
 
-    // Get user by id
+    // Delete database administrator
+    app.get("/delete-admin/:id", (req, res) => {
+      const deleteSql = "DELETE FROM administrator WHERE id = ?"
+      const id = req.params.id
+      db.query(deleteSql, id, (err, result) => {
+        if (err) throw err
+        res.redirect("/administrator")
+      })
+    })
+
+    // Get user by id user
     app.get("/edit/:id", (req, res) => {
       const sql = "SELECT * FROM user WHERE id = ?"
       const id = req.params.id
@@ -148,6 +227,17 @@ db.connect((err) => {
         if (err) throw err
         const userData = result[0]
         res.render("edit", { userData: userData, judul: "EDIT MAHASISWA MAGANG" })
+      })
+    })
+    
+    // Get administrator by id administrator
+    app.get("/edit-admin/:id", (req, res) => {
+      const sql = "SELECT * FROM administrator WHERE id = ?"
+      const id = req.params.id
+      db.query(sql, id, (err, result) => {
+        if (err) throw err
+        const userData = result[0]
+        res.render("edit-admin", { userData: userData, judul: "EDIT MAHASISWA MAGANG" })
       })
     })
 
@@ -174,12 +264,14 @@ db.connect((err) => {
           // Jika username ditemukan di database akun
           const hashedPassword = results[0].password
           const role = results[0].role // tambahkan ini untuk mengecek role
+          const id_mahasiswa = results[0].id // tambahkan ini untuk mendapatkan ID mahasiswa
           bcrypt.compare(password, hashedPassword, (err, isMatch) => {
             if (err) {
               console.log(err)
             } else if (isMatch) {
               // Jika password cocok, render dashboard berdasarkan role
               req.session.username = username
+              req.session.id_mahasiswa = id_mahasiswa // tambahkan ini untuk menyimpan ID mahasiswa pada session
               if (role === 'admin') {
                 const sql = "SELECT * FROM akun"
                 db.query(sql, (err, result) => {
@@ -397,15 +489,29 @@ db.connect((err) => {
     })
 
     // kegiatan
-    app.get("/kegiatan", (req, res) => {
+    app.get("/kegiatan", async (req, res) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM akun"
-        db.query(sql, (err, result) => {
+        const akunSql = "SELECT * FROM akun"
+        const kegiatanSql = "SELECT * FROM kegiatan WHERE id_mahasiswa = ?"
+
+        db.query(akunSql, (err, akunResults) => {
           if (err) throw err
-          const mahasiswa = JSON.parse(JSON.stringify(result))
-          res.render("kegiatan", { mahasiswa: mahasiswa, username: req.session.username })
+          const akunData = JSON.parse(JSON.stringify(akunResults))
+          console.log("Hasil akun -> ", akunData)
+
+          const id_mahasiswa = req.session.id_mahasiswa // tambahkan ini untuk mendapatkan ID mahasiswa
+          db.query(kegiatanSql, id_mahasiswa, (err, kegiatanResults) => {
+            if (err) throw err
+            const kegiatanData = JSON.parse(JSON.stringify(kegiatanResults))
+            kegiatanData.forEach((kegiatan) => {
+              kegiatan.mulai = moment(kegiatan.tanggal).format("YYYY-MM-DD")
+            })
+            console.log("Hasil kegiatan -> ", kegiatanData)
+
+            res.render("kegiatan", { akun: akunData, kegiatan: kegiatanData, username: req.session.username })
+          })
         })
       }
     })
@@ -468,6 +574,12 @@ db.connect((err) => {
     app.get("/akun-admin", (req, res) => {
       if (err) throw err
       res.render("akun-admin")
+    })
+    
+    // tambah kegiatan mhs
+    app.get("/tambah-kegiatan-mhs", (req, res) => {
+      if (err) throw err
+      res.render("tambah-kegiatan-mhs", { id_mahasiswa: req.session.id_mahasiswa })
     })
 
   })
