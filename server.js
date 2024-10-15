@@ -153,87 +153,59 @@ db.connect((err) => {
 
     // tangkap data mahasiswa dan admin
     app.get("/", (req, res) => {
-      const akunSql = "SELECT * FROM akun";
-      const mahasiswaSql = "SELECT * FROM mahasiswa";
-    
-      db.query(akunSql, (err, akunResults) => {
-        if (err) throw err;
-        const akunData = JSON.parse(JSON.stringify(akunResults));
-        console.log("Hasil akun -> ", akunData)
-    
-        db.query(mahasiswaSql, (err, mahasiswaResults) => {
-          if (err) throw err;
-          const mahasiswaData = JSON.parse(JSON.stringify(mahasiswaResults));
-          console.log("Hasil mahasiswa -> ", mahasiswaData)
-    
-          res.render("login", { akun: akunData, mahasiswa: mahasiswaData });
-        });
-      });
-    });
+      const sql = "SELECT * FROM akun"
+      db.query(sql, (err, result) => {
+        if (err) throw err
+        const akun = JSON.parse(JSON.stringify(result))
+        res.render("login", { akun: akun })
+      })
+    })
   
     // login page
     app.post("/login", (req, res) => {
-      const username = req.body.username;
-      const password = req.body.password;
+      const username = req.body.username
+      const password = req.body.password
 
-      // Cari username di database admin dan mahasiswa
-      db.query("SELECT * FROM akun WHERE username = ?", [username], (err, adminResults) => {
+      // Cari username di database akun
+      db.query("SELECT * FROM akun WHERE username = ?", [username], (err, results) => {
         if (err) {
-          console.log(err);
-        } else if (adminResults.length > 0) {
-          // Jika username ditemukan di database admin
-          const hashedPassword = adminResults[0].password;
+          console.log(err)
+        } else if (results.length > 0) {
+          // Jika username ditemukan di database akun
+          const hashedPassword = results[0].password
+          const role = results[0].role // tambahkan ini untuk mengecek role
           bcrypt.compare(password, hashedPassword, (err, isMatch) => {
             if (err) {
-              console.log(err);
+              console.log(err)
             } else if (isMatch) {
-              // Jika password cocok, render dashboard admin
+              // Jika password cocok, render dashboard berdasarkan role
               req.session.username = username
-              const sql = "SELECT * FROM akun";
-              db.query(sql, (err, result) => {
-                const Akun = JSON.parse(JSON.stringify(result));
-                res.render("dashboard", { akun: Akun, username: username });
-              });
+              if (role === 'admin') {
+                const sql = "SELECT * FROM akun"
+                db.query(sql, (err, result) => {
+                  const Akun = JSON.parse(JSON.stringify(result))
+                  res.render("dashboard", { akun: Akun, username: username })
+                })
+              } else if (role === 'mahasiswa') {
+                const sql = "SELECT * FROM akun"
+                db.query(sql, (err, result) => {
+                  const mahasiswa = JSON.parse(JSON.stringify(result))
+                  res.render("mahasiswa", { mahasiswa: mahasiswa, username: username })
+                })
+              }
             } else {
               // Jika password tidak cocok, render error
-              console.log("Invalid username or password.");
-              res.render("login", { error: "Invalid username or password." });
+              console.log("Invalid username or password.")
+              res.render("login", { error: "Invalid username or password." })
             }
-          });
+          })
         } else {
-          // Jika username tidak ditemukan di database admin, cari di database mahasiswa
-          db.query("SELECT * FROM mahasiswa WHERE username = ?", [username], (err, mahasiswaResults) => {
-            if (err) {
-              console.log(err);
-            } else if (mahasiswaResults.length > 0) {
-              // Jika username ditemukan di database mahasiswa
-              const hashedPassword = mahasiswaResults[0].password;
-              bcrypt.compare(password, hashedPassword, (err, isMatch) => {
-                if (err) {
-                  console.log(err);
-                } else if (isMatch) {
-                  // Jika password cocok, redirect dashboard mahasiswa
-                  req.session.username = username
-                  const sql = "SELECT * FROM mahasiswa"
-                  db.query(sql, (err, result) => {
-                    const mahasiswa = JSON.parse(JSON.stringify(result))
-                    res.render("mahasiswa", {mahasiswa: mahasiswa, username: username})
-                  })
-                } else {
-                  // Jika password tidak cocok, render error
-                  console.log("Invalid username or password.");
-                  res.render("login", { error: "Invalid username or password." });
-                }
-              });
-            } else {
-              // Jika username tidak ditemukan di database mahasiswa, render error
-              console.log("Invalid username or password.");
-              res.render("login", { error: "Invalid username or password." });
-            }
-          });
+          // Jika username tidak ditemukan di database akun, render error
+          console.log("Invalid username or password.")
+          res.render("login", { error: "Invalid username or password." })
         }
-      });
-    });
+      })
+    })
 
     // dashboard
     app.get("/dashboard", (req, res) => {
@@ -254,7 +226,7 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM mahasiswa"
+        const sql = "SELECT * FROM akun"
         db.query(sql, (err, result) => {
           if (err) throw err
           const mahasiswa = JSON.parse(JSON.stringify(result))
@@ -286,43 +258,11 @@ db.connect((err) => {
       res.render("akun-mhs")
     })
 
-    // tambah akun mahasiswa
+    // tambah akun
     app.post("/tambah-akun", (req, res) => {
       const username = req.body.username
       const password = req.body.password
-
-      const sql = "SELECT * FROM mahasiswa WHERE username = ?"
-      db.query(sql, [username], (err, result) => {
-        if (err) {
-          console.error(err)
-          res.status(500).send("Error creating account")
-        } else if (result.length > 0) {
-          res.render("akun-mhs", { error: "Username sudah ada"})
-        } else {
-          bcrypt.hash(password, 10, (err, hashedPassword) => {
-            if (err) {
-              console.error(err)
-              res.status(500).send("Error creating account")
-            } else {
-              const sql = "INSERT INTO mahasiswa (username, password) VALUES (?, ?)"
-              db.query(sql, [username, hashedPassword], (err, result) => {
-                if (err) {
-                  console.error(err)
-                  res.status(500).send("Error creating account")
-                } else {
-                  res.redirect("/data-mhs")
-                }
-              })
-            }
-          })
-        }
-      })
-    })
-
-    // tambah akun admin
-    app.post("/tambah-akun-admin", (req, res) => {
-      const username = req.body.username
-      const password = req.body.password
+      const role = req.body.role
 
       const sql = "SELECT * FROM akun WHERE username = ?"
       db.query(sql, [username], (err, result) => {
@@ -330,20 +270,20 @@ db.connect((err) => {
           console.error(err)
           res.status(500).send("Error creating account")
         } else if (result.length > 0) {
-          res.render("akun-admin", { error: "Username sudah ada"})
+          res.render("akun-admin", { error: "Username sudah ada" })
         } else {
           bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
               console.error(err)
               res.status(500).send("Error creating account")
             } else {
-              const sql = "INSERT INTO akun (username, password) VALUES (?, ?)"
-              db.query(sql, [username, hashedPassword], (err, result) => {
+              const sql = "INSERT INTO akun (username, password, role) VALUES (?, ?, ?)"
+              db.query(sql, [username, hashedPassword, role], (err, result) => {
                 if (err) {
                   console.error(err)
                   res.status(500).send("Error creating account")
                 } else {
-                  res.redirect("/akun-admin")
+                  res.redirect("/data-mhs")
                 }
               })
             }
@@ -381,40 +321,28 @@ db.connect((err) => {
     })
 
     // administrator
-    // app.get("/administrator", (req, res) => {
-    //   if (!req.session.username) {
-    //     res.redirect("/login")
-    //   } else {
-    //     const sql = "SELECT * FROM akun"
-    //     db.query(sql, (err, result) => {
-    //       if (err) throw err
-    //       const akun = JSON.parse(JSON.stringify(result))
-    //       res.render("administrator", { akun: akun, username: req.session.username })
-    //     })
-    //   }
-    // })
     app.get("/administrator", (req, res) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const akunSql = "SELECT * FROM akun";
-        const adminSql = "SELECT * FROM administrator";
+        const akunSql = "SELECT * FROM akun"
+        const adminSql = "SELECT * FROM administrator"
       
         db.query(akunSql, (err, akunResults) => {
-          if (err) throw err;
-          const akunData = JSON.parse(JSON.stringify(akunResults));
+          if (err) throw err
+          const akunData = JSON.parse(JSON.stringify(akunResults))
           console.log("Hasil akun -> ", akunData)
       
           db.query(adminSql, (err, adminResults) => {
-            if (err) throw err;
-            const adminData = JSON.parse(JSON.stringify(adminResults));
+            if (err) throw err
+            const adminData = JSON.parse(JSON.stringify(adminResults))
             console.log("Hasil admin -> ", adminData)
       
-            res.render("administrator", { akun: akunData, admin: adminData, username: req.session.username });
-          });
-        });
+            res.render("administrator", { akun: akunData, admin: adminData, username: req.session.username })
+          })
+        })
       }
-    });
+    })
     
     // pengaturan
     app.get("/pengaturan", (req, res) => {
@@ -432,7 +360,7 @@ db.connect((err) => {
 
     // mahasiswa
     app.get("/mahasiswa", (req, res) => {
-      const sql = "SELECT * FROM mahasiswa"
+      const sql = "SELECT * FROM akun"
       db.query(sql, (err, result) => {
         if (err) throw err
         const akun = JSON.parse(JSON.stringify(result))
@@ -445,7 +373,7 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM mahasiswa"
+        const sql = "SELECT * FROM akun"
         db.query(sql, (err, result) => {
           if (err) throw err
           const mahasiswa = JSON.parse(JSON.stringify(result))
@@ -459,7 +387,7 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM mahasiswa"
+        const sql = "SELECT * FROM akun"
         db.query(sql, (err, result) => {
           if (err) throw err
           const mahasiswa = JSON.parse(JSON.stringify(result))
@@ -473,7 +401,7 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM mahasiswa"
+        const sql = "SELECT * FROM akun"
         db.query(sql, (err, result) => {
           if (err) throw err
           const mahasiswa = JSON.parse(JSON.stringify(result))
@@ -487,7 +415,7 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM mahasiswa"
+        const sql = "SELECT * FROM akun"
         db.query(sql, (err, result) => {
           if (err) throw err
           const mahasiswa = JSON.parse(JSON.stringify(result))
