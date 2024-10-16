@@ -403,13 +403,64 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM akun"
+        const sql = "SELECT k.id, k.hari, k.tanggal, k.jam, k.kegiatan, a.username FROM kegiatan k INNER JOIN akun a ON k.id_mahasiswa = a.id"
+
         db.query(sql, (err, result) => {
           if (err) throw err
-          const akun = JSON.parse(JSON.stringify(result))
-          res.render("data-kegiatan", { akun: akun, username: req.session.username })
+          const kegiatanData = JSON.parse(JSON.stringify(result))
+          console.log("Hasil kegiatan -> ", kegiatanData)
+
+          res.render("data-kegiatan", { kegiatan: kegiatanData, username: req.session.username })
         })
       }
+    })
+
+    // Edit data kegiatan
+    app.get("/edit-kegiatan/:id", (req, res) => {
+      const id = req.params.id
+      const sql = "SELECT * FROM kegiatan WHERE id = ?"
+
+      db.query(sql, id, (err, result) => {
+        if (err) throw err
+        const kegiatanData = result[0]
+        res.render("edit-kegiatan", { kegiatanData: kegiatanData, username: req.session.username })
+      })
+    })
+
+    // Update data kegiatan
+    app.post("/update-kegiatan/:id", (req, res) => {
+      const id = req.params.id
+      const { hari, tanggal } = req.body
+      const jamArray = []
+      const kegiatanArray = []
+
+      // Ambil semua jam dan kegiatan dari req.body
+      let i = 1
+      while (req.body[`jam-${i}`]) { // Asumsikan jam diinputkan dengan format jam-1, jam-2, ...
+          jamArray.push(req.body[`jam-${i}`])
+          kegiatanArray.push(req.body[`kegiatan-${i}`])
+          i++
+      }
+
+      const jam = jamArray.join(', ')
+      const kegiatan = kegiatanArray.join(', ')
+
+      const sql = "UPDATE kegiatan SET hari = ?, tanggal = ?, jam = ?, kegiatan = ? WHERE id = ?"
+      db.query(sql, [hari, tanggal, jam, kegiatan, id], (err, result) => {
+          if (err) throw err
+          res.redirect("/data-kegiatan")
+      })
+    })
+
+    // Hapus data kegiatan
+    app.get("/hapus-kegiatan/:id", (req, res) => {
+      const id = req.params.id
+      const sql = "DELETE FROM kegiatan WHERE id = ?"
+
+      db.query(sql, id, (err, result) => {
+        if (err) throw err
+        res.redirect("/data-kegiatan")
+      })
     })
 
     // administrator
