@@ -59,46 +59,46 @@
               <h3>DATA KEGIATAN</h3>
               <a class="btn btn-success bi-plus mb-3" href="/tambah-kegiatan"> Tambah</a>
               <table class="table">
-                  <thead>
-                      <tr>
-                        <th scope="col">No</th>
-                        <th scope="col">Nama</th>
-                        <th scope="col">Hari</th>
-                        <th scope="col">Tanggal</th>
-                        <th scope="col">Jam</th>
-                        <th scope="col">Kegiatan</th>
-                        <th scope="col">Aksi</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                    <% let index = 1; let increment = 1; %>
-                    <% kegiatan.forEach((kegiatans) => { %>
-                      <tr>
-                        <th scope="row"><%= kegiatans.id %></th>
-                        <th scope="row"><%= kegiatans.username %></th>
-                        <th scope="row"><%= kegiatans.hari %></th>
-                        <th scope="row"><%= moment(kegiatans.tanggal).format('DD-MM-YYYY') %></th>
-                        <th scope="row">
-                            <% const jam = kegiatans.jam.split(', '); %>
-                            <% for (let i = 0; i < jam.length; i++) { %>
-                                <%= jam[i] %><br>
-                            <% } %>
-                        </th>
-                        <th scope="row">
-                          <% const kegiatan = kegiatans.kegiatan.split(', '); %>
-                          <% for (let i = 0; i < kegiatan.length; i++) { %>
-                            <%= i + 1 %>. <%= kegiatan[i] %><br>
-                          <% } %>
-                        </th>
-                        <th scope="row">
-                            <a href="/edit-kegiatan/<%= kegiatans.id %>" class="btn btn-warning bi-pencil-square"></a>
-                            <a href="/hapus-kegiatan/<%= kegiatans.id %>" class="btn btn-danger bi-trash-fill" onclick="return confirm('Are you sure you want to delete this kegiatan?')"></a>
-                            <a href="" class="btn btn-primary bi-file-text-fill"></a>
-                        </th>
+                <thead>
+                  <tr>
+                    <th scope="col">No</th>
+                    <th scope="col">Nama Mahasiswa</th>
+                    <th scope="col">Hari</th>
+                    <th scope="col">Tanggal</th>
+                    <th scope="col">Jam</th>
+                    <th scope="col">Kegiatan</th>
+                    <th scope="col">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% let index = 1; let increment = 1; %>
+                  <% kegiatan.forEach((kegiatans) => { %>
+                    <tr>
+                      <th scope="row"><%= kegiatans.id %></th>
+                      <th scope="row"><%= kegiatans.username %></th>
+                      <th scope="row"><%= kegiatans.hari %></th>
+                      <th scope="row"><%= moment(kegiatans.tanggal).format('DD-MM-YYYY') %></th>
+                      <th scope="row">
+                        <% const jam = kegiatans.jam.split(', '); %>
+                        <% for (let i = 0; i < jam.length; i++) { %>
+                          <%= jam[i] %><br>
+                        <% } %>
+                      </th>
+                      <th scope="row">
+                        <% const kegiatan = kegiatans.kegiatan.split(', '); %>
+                        <% for (let i = 0; i < kegiatan.length; i++) { %>
+                          <%= i + 1 %>. <%= kegiatan[i] %><br>
+                        <% } %>
+                      </th>
+                      <th scope="row">
+                        <a href="/edit-kegiatan/<%= kegiatans.id %>" class="btn btn-warning bi-pencil-square"></a>
+                        <a href="/hapus-kegiatan/<%= kegiatans.id %>" class="btn btn-danger bi-trash-fill" onclick="return confirm('Are you sure you want to delete this kegiatan?')"></a>
+                        <a href="" class="btn btn-primary bi-file-text-fill"></a>
+                      </th>
                     </tr>
-                      <% increment = kegiatan.length; %>
-                      <% }) %>
-                  </tbody>
+                    <% increment = kegiatan.length; %>
+                  <% }) %>
+                </tbody>
               </table>
             </div>
 

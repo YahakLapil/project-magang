@@ -397,7 +397,6 @@ db.connect((err) => {
         })
       }
     })
-
     // data kegiatan
     app.get("/data-kegiatan", (req, res) => {
       if (!req.session.username) {
@@ -589,9 +588,67 @@ db.connect((err) => {
 
     // tambah kegiatan
     app.get("/tambah-kegiatan", (req, res) => {
-      if (err) throw err
-      res.render("tambah-kegiatan")
-    })
+      const sql = "SELECT * FROM akun WHERE role = 'mahasiswa'";
+      db.query(sql, (err, result) => {
+        if (err) throw err;
+        const mahasiswa = JSON.parse(JSON.stringify(result));
+        res.render("tambah-kegiatan", { mahasiswa: mahasiswa });
+      });
+    });
+
+    // tambah kegiatan
+    app.post("/tambah-kegiatan", (req, res) => {
+      const { id_mahasiswa, tanggal, awal, akhir, kegiatan } = req.body;
+
+      const tanggalFormat = moment(tanggal).format("YYYY-MM-DD");
+      const hari = moment(tanggal).format("dddd");
+      const jam = `${awal} - ${akhir}`;
+
+      let hariIndo;
+      switch (hari) {
+        case "Monday":
+          hariIndo = "Senin";
+          break;
+        case "Tuesday":
+          hariIndo = "Selasa";
+          break;
+        case "Wednesday":
+          hariIndo = "Rabu";
+          break;
+        case "Thursday":
+          hariIndo = "Kamis";
+          break;
+        case "Friday":
+          hariIndo = "Jumat";
+          break;
+        case "Saturday":
+          hariIndo = "Sabtu";
+          break;
+        case "Sunday":
+          hariIndo = "Minggu";
+          break;
+        default:
+          hariIndo = hari;
+      }
+
+      const sqlCek = "SELECT * FROM kegiatan WHERE tanggal = ? AND id_mahasiswa = ?";
+      db.query(sqlCek, [tanggalFormat, id_mahasiswa], (err, result) => {
+        if (err) throw err;
+        if (result.length > 0) {
+          const sqlUpdate = "UPDATE kegiatan SET hari = ?, jam = CONCAT_WS(', ', jam, ?), kegiatan = CONCAT_WS(', ', kegiatan, ?) WHERE tanggal = ? AND id_mahasiswa = ?";
+          db.query(sqlUpdate, [hariIndo, jam, kegiatan, tanggalFormat, id_mahasiswa], (err, result) => {
+            if (err) throw err;
+            res.redirect("/data-kegiatan");
+          });
+        } else {
+          const insertSql = "INSERT INTO kegiatan (hari, tanggal, jam, kegiatan, id_mahasiswa) VALUES (?, ?, ?, ?, ?)";
+          db.query(insertSql, [hariIndo, tanggalFormat, jam, kegiatan, id_mahasiswa], (err, result) => {
+            if (err) throw err;
+            res.redirect("/data-kegiatan");
+          });
+        }
+      });
+    });
 
     // tambah admin
     app.get("/tambah-admin", (req, res) => {
