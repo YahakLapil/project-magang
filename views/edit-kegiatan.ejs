@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Data Kegiatan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <form action="/update-kegiatan/<%= kegiatanData.id %>" method="post">
+            <div class="mb-3">
+                <label for="hari" class="form-label">Hari</label>
+                <input type="text" class="form-control" id="hari" name="hari" value="<%= kegiatanData.hari %>" required>
+            </div>
+            <div class="mb-3">
+                <label for="tanggal" class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="tanggal" name="tanggal" value="<%= moment(kegiatanData.tanggal).format('YYYY-MM-DD') %>" required>
+            </div>
+            <div class="mb-3">
+                <label for="jam" class="form-label">Jam</label>
+                <% const jamArray = kegiatanData.jam.split(', '); %>
+                <% jamArray.forEach((jam, index) => { %>
+                    <input type="text" class="form-control mb-2" id="jam-<%= index + 1 %>" name="jam-<%= index + 1 %>" value="<%= jam %>" required>
+                <% }) %>
+            </div>
+            <div class="mb-3">
+                <label for="kegiatan" class="form-label">Kegiatan</label>
+                <% const kegiatanArray = kegiatanData.kegiatan.split(', '); %>
+                <% kegiatanArray.forEach((kegiatan, index) => { %>
+                    <textarea class="form-control mb-2" id="kegiatan-<%= index + 1 %>" name="kegiatan-<%= index + 1 %>" rows="3" required><%= kegiatan %></textarea>
+                <% }) %>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+            <a class="btn btn-danger" href="/data-kegiatan"> Batal</a>
+        </form>
+    </div> 
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
