@@ -27,10 +27,13 @@
                     </div>
                     <input type="hidden" name="role" value="mahasiswa">
                     <div class="text-center mt-3">
-                        <input type="submit" class="btn btn-success" value="Simpan">
+                        <button type="submit" class="btn btn-success" <% if (accountCreated) { %>disabled<% } %>>Simpan</button>
                         <a class="btn btn-danger" href="/data-mhs"> Tutup</a>
                     </div>
                 </form>
+                <% if (accountCreated) { %>
+                  <p>Akun mahasiswa sudah dibuat. Anda tidak dapat membuat akun lagi.</p>
+                <% } %>
             </div>
         </div>
     </div>
