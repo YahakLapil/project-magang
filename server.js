@@ -347,42 +347,106 @@ db.connect((err) => {
     // akun mahasiswa
     app.get("/akun-mhs", (req, res) => {
       if (err) throw err
-      res.render("akun-mhs")
+      res.render("akun-mhs", { accountCreated: req.session.accountCreated })
     })
 
     // tambah akun
-    app.post("/tambah-akun", (req, res) => {
-      const username = req.body.username
-      const password = req.body.password
-      const role = req.body.role
+    // app.post("/tambah-akun", (req, res) => {
+    //   const username = req.body.username
+    //   const password = req.body.password
+    //   const role = req.body.role
 
-      const sql = "SELECT * FROM akun WHERE username = ?"
-      db.query(sql, [username], (err, result) => {
+    //   const sql = "SELECT * FROM akun WHERE username = ?"
+    //   db.query(sql, [username], (err, result) => {
+    //     if (err) {
+    //       console.error(err)
+    //       res.status(500).send("Error creating account")
+    //     } else if (result.length > 0) {
+    //       res.render("akun-admin", { error: "Username sudah ada", accountCreated: true })
+    //     } else {
+    //       bcrypt.hash(password, 10, (err, hashedPassword) => {
+    //         if (err) {
+    //           console.error(err)
+    //           res.status(500).send("Error creating account")
+    //         } else {
+    //           const sql = "INSERT INTO akun (username, password, role) VALUES (?, ?, ?)"
+    //           db.query(sql, [username, hashedPassword, role], (err, result) => {
+    //             if (err) {
+    //               console.error(err)
+    //               res.status(500).send("Error creating account")
+    //             } else {
+    //               req.session.accountCreated = true
+    //               res.redirect("/data-mhs")
+    //             }
+    //           })
+    //         }
+    //       })
+    //     }
+    //   })
+    // })
+
+    // Route to show the create account page for a specific user
+app.get("/akun-mhs/:id", (req, res) => {
+  const userId = req.params.id; // Get the user ID from the URL
+  const sql = "SELECT * FROM akun WHERE id = ?"; // Assuming user_id is the foreign key in akun table
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) throw err;
+
+    // Check if an account exists for the user ID
+    if (result.length > 0) {
+      req.session.accountCreated = true; // Set session variable if account exists
+    } else {
+      req.session.accountCreated = false; // Set session variable if account does not exist
+    }
+
+    // Render the account creation page
+    res.render("akun-mhs", { accountCreated: req.session.accountCreated });
+  });
+});
+
+// Route to handle account creation
+app.post("/tambah-akun", (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const role = req.body.role;
+
+  // Check if an account already exists for the selected user ID
+  const sqlCheck = "SELECT * FROM akun WHERE username = ?";
+  db.query(sqlCheck, [username], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Error checking account");
+    }
+
+    if (result.length > 0) {
+      // Account already exists
+      req.session.accountCreated = true;
+      return res.render("akun-admin", { error: "Username sudah ada", accountCreated: req.session.accountCreated });
+    }
+
+    // Proceed to create a new account
+    bcrypt.hash(password, 10, (err, hashedPassword) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error creating account");
+      }
+
+      const sqlInsert = "INSERT INTO akun (username, password, role) VALUES (?, ?, ?)";
+      db.query(sqlInsert, [username, hashedPassword, role], (err, result) => {
         if (err) {
-          console.error(err)
-          res.status(500).send("Error creating account")
-        } else if (result.length > 0) {
-          res.render("akun-admin", { error: "Username sudah ada" })
-        } else {
-          bcrypt.hash(password, 10, (err, hashedPassword) => {
-            if (err) {
-              console.error(err)
-              res.status(500).send("Error creating account")
-            } else {
-              const sql = "INSERT INTO akun (username, password, role) VALUES (?, ?, ?)"
-              db.query(sql, [username, hashedPassword, role], (err, result) => {
-                if (err) {
-                  console.error(err)
-                  res.status(500).send("Error creating account")
-                } else {
-                  res.redirect("/data-mhs")
-                }
-              })
-            }
-          })
+          console.error(err);
+          return res.status(500).send("Error creating account");
         }
-      })
-    })
+
+        if (role === "mahasiswa") {
+          req.session.accountCreated = true; // Set session variable to true
+        }
+        res.redirect("/data-mhs"); // Redirect after successful account creation
+      });
+    });
+  });
+});
 
     // data absen
     app.get("/data-absen", (req, res) => {
@@ -651,10 +715,15 @@ db.connect((err) => {
     });
 
     // tambah admin
-    app.get("/tambah-admin", (req, res) => {
+    app.get("/akun-mhs", (req, res) => {
       if (err) throw err
-        res.render("tambah-admin")
+      res.render("akun-mhs", { accountCreated: req.session.accountCreated })
     })
+
+//     // Tambahkan route untuk mengarahkan ke akun-mhs berdasarkan id user
+// app.get("/akun-mhs/:id", (req, res) => {
+//   res.render("akun-mhs", { accountCreated: req.session.accountCreated });
+// });
 
     // insert tambah-admin
     app.post("/tambah-adm", (req, res) => {
