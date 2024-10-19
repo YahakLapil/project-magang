@@ -29,14 +29,10 @@
           <input type="email" name="email" class="form-control" required>
         </div>
       </div>
-      <button type="submit" class="btn btn-success" <% if (accountCreated) { %>disabled<% } %>>Simpan</button>
+      <button type="submit" class="btn btn-success">Simpan</button>
       <button class="btn btn-warning" type="reset"> Reset</button>
       <a class="btn btn-danger" href="/administrator"> Batal</a>
     </form>
-
-    <% if (accountCreated) { %>
-      <p>Akun mahasiswa sudah dibuat. Anda tidak dapat membuat akun lagi.</p>
-    <% } %>
 
   </div>
     
