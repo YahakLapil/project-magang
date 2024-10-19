@@ -352,92 +352,117 @@ db.connect((err) => {
 
     // Route to show the create account page for a specific user
     app.get("/akun-mhs/:id", (req, res) => {
-      const userId = req.params.id; // Get the user ID from the URL
-      const sql = "SELECT * FROM akun WHERE id = ?"; // Assuming user_id is the foreign key in akun table
+      const userId = req.params.id // Get the user ID from the URL
+      const sql = "SELECT * FROM akun WHERE id = ?" // Assuming user_id is the foreign key in akun table
 
       db.query(sql, [userId], (err, result) => {
-        if (err) throw err;
+        if (err) throw err
 
         // Check if an account exists for the user ID
         if (result.length > 0) {
-          req.session.accountCreated = true; // Set session variable if account exists
+          req.session.accountCreated = true // Set session variable if account exists
         } else {
-          req.session.accountCreated = false; // Set session variable if account does not exist
+          req.session.accountCreated = false // Set session variable if account does not exist
         }
 
         // Render the account creation page
-        res.render("akun-mhs", { accountCreated: req.session.accountCreated });
-      });
-    });
+        res.render("akun-mhs", { accountCreated: req.session.accountCreated })
+      })
+    })
 
-        // Route to show the create account page for a specific user
+    // Route to show the create account page for a specific user
     app.get("/akun-admin/:id", (req, res) => {
-      const adminId = req.params.id; // Get the user ID from the URL
-      const sql = "SELECT * FROM akun WHERE id = ?"; // Assuming user_id is the foreign key in akun table
+      const adminId = req.params.id // Get the user ID from the URL
+      const sql = "SELECT * FROM akun WHERE id = ?" // Assuming user_id is the foreign key in akun table
       console.log("adminId = ", adminId)
 
       db.query(sql, [adminId], (err, result) => {
-        if (err) throw err;
+        if (err) throw err
 
         // Check if an account exists for the user ID
         if (result.length > 0) {
-          req.session.accountCreated = true; // Set session variable if account exists
+          req.session.accountCreated = true // Set session variable if account exists
         } else {
-          req.session.accountCreated = false; // Set session variable if account does not exist
+          req.session.accountCreated = false // Set session variable if account does not exist
         }
 
         // Render the account creation page
-        res.render("akun-admin", { accountCreated: req.session.accountCreated, adminId: adminId });
-      });
-    });
+        res.render("akun-admin", { accountCreated: req.session.accountCreated, adminId: adminId })
+      })
+    })
 
     // Route to handle admin account creation
     app.post("/tambah-akun", (req, res) => {
-      const username = req.body.username;
-      const password = req.body.password;
-      const role = req.body.role;
-      const adminId = req.body.admin_id;
+      const username = req.body.username
+      const password = req.body.password
+      const role = req.body.role
 
       // Check if an account already exists for the selected username
-      const sqlCheck = "SELECT * FROM akun WHERE username = ?";
+      const sqlCheck = "SELECT * FROM akun WHERE username = ?"
       db.query(sqlCheck, [username], (err, result) => {
         if (err) {
-          console.error(err);
-          return res.status(500).send("Error checking account");
+          console.error(err)
+          return res.status(500).send("Error checking account")
         }
 
         if (result.length > 0) {
           // Account already exists
-          req.session.accountCreated = true; // Set session variable to true
-          return res.render("akun-admin", { error: "Username sudah ada", accountCreated: req.session.accountCreated });
+          return res.render("akun-admin", { error: "Username sudah ada", accountCreated: req.session.accountCreated })
         }
 
-        // Proceed to create a new account
-        bcrypt.hash(password, 10, (err, hashedPassword) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).send("Error creating account");
-          }
+        let userId = null
+        let adminId = null
 
-          const sqlInsert = "INSERT INTO akun (user_id, admin_id, username, password, role) VALUES (NULL, ?, ?, ?, ?)";
-          db.query(sqlInsert, [adminId, username, hashedPassword, role], (err, result) => {
+        if (role === "mahasiswa") {
+          // Get mahasiswa id from user table
+          const sqlUserId = "SELECT id FROM user WHERE id NOT IN (SELECT user_id FROM akun WHERE user_id IS NOT NULL) LIMIT 1"
+          db.query(sqlUserId, (err, userResult) => {
             if (err) {
-              console.error(err);
-              return res.status(500).send("Error creating account");
+              console.error(err)
+              return res.status(500).send("Error inserting account")
             }
-            if (role === "mahasiswa") {
-                        req.session.accountCreated = true; // Set session variable to true
-                        res.redirect("/data-mhs");
-                      }
 
-            if (role === "admin") {
-              req.session.accountCreated = true; // Set session variable to true
-            res.redirect("/administrator"); // Redirect after successful account creation
+            userId = userResult.length > 0 ? userResult[0].id : null
+
+            if (!userId) {
+              return res.render("akun-mhs", { error: "Tidak ada ID mahasiswa yang tersedia", accountCreated: false })
             }
-          });
-        });
-      });
-    });
+
+            bcrypt.hash(password, 10, (err, hashedPassword) => {
+              if (err) throw err
+              const sqlInsert = "INSERT INTO akun (user_id, admin_id, username, password, role) VALUES (?, ?, ?, ?, ?)"
+              db.query(sqlInsert, [userId, adminId, username, hashedPassword, role], (err, result) => {
+                if (err) throw err
+                res.redirect("/data-mhs") // Redirect setelah berhasil menambah akun
+              })
+            })
+          })
+        } else if (role === "admin") {
+          // Get admin id from administrator table
+          const sqlAdminId = "SELECT id FROM administrator WHERE id NOT IN (SELECT admin_id FROM akun WHERE admin_id IS NOT NULL) LIMIT 1"
+          db.query(sqlAdminId, (err, adminResult) => {
+            if (err) {
+              console.error(err)
+              return res.status(500).send("Error inserting account")
+            }
+            adminId = adminResult.length > 0 ? adminResult[0].id : null
+
+            if (!adminId) {
+              return res.render("akun-admin", { error: "Tidak ada ID administrator yang tersedia", accountCreated: false })
+            }
+
+            bcrypt.hash(password, 10, (err, hashedPassword) => {
+              if (err) throw err
+              const sqlInsert = "INSERT INTO akun (user_id, admin_id, username, password, role) VALUES (?, ?, ?, ?, ?)"
+              db.query(sqlInsert, [userId, adminId, username, hashedPassword, role], (err, result) => {
+                if (err) throw err
+                res.redirect("/administrator") // Redirect setelah berhasil menambah akun
+              })
+            })
+          })
+        }
+      })
+    })
 
     // data absen
     app.get("/data-absen", (req, res) => {
@@ -643,72 +668,72 @@ db.connect((err) => {
 
     // tambah kegiatan
     app.get("/tambah-kegiatan", (req, res) => {
-      const sql = "SELECT * FROM akun WHERE role = 'mahasiswa'";
+      const sql = "SELECT * FROM akun WHERE role = 'mahasiswa'"
       db.query(sql, (err, result) => {
-        if (err) throw err;
-        const mahasiswa = JSON.parse(JSON.stringify(result));
-        res.render("tambah-kegiatan", { mahasiswa: mahasiswa });
-      });
-    });
+        if (err) throw err
+        const mahasiswa = JSON.parse(JSON.stringify(result))
+        res.render("tambah-kegiatan", { mahasiswa: mahasiswa })
+      })
+    })
 
     // tambah kegiatan
     app.post("/tambah-kegiatan", (req, res) => {
-      const { id_mahasiswa, tanggal, awal, akhir, kegiatan } = req.body;
+      const { id_mahasiswa, tanggal, awal, akhir, kegiatan } = req.body
 
-      const tanggalFormat = moment(tanggal).format("YYYY-MM-DD");
-      const hari = moment(tanggal).format("dddd");
-      const jam = `${awal} - ${akhir}`;
+      const tanggalFormat = moment(tanggal).format("YYYY-MM-DD")
+      const hari = moment(tanggal).format("dddd")
+      const jam = `${awal} - ${akhir}`
 
-      let hariIndo;
+      let hariIndo
       switch (hari) {
         case "Monday":
-          hariIndo = "Senin";
-          break;
+          hariIndo = "Senin"
+          break
         case "Tuesday":
-          hariIndo = "Selasa";
-          break;
+          hariIndo = "Selasa"
+          break
         case "Wednesday":
-          hariIndo = "Rabu";
-          break;
+          hariIndo = "Rabu"
+          break
         case "Thursday":
-          hariIndo = "Kamis";
-          break;
+          hariIndo = "Kamis"
+          break
         case "Friday":
-          hariIndo = "Jumat";
-          break;
+          hariIndo = "Jumat"
+          break
         case "Saturday":
-          hariIndo = "Sabtu";
-          break;
+          hariIndo = "Sabtu"
+          break
         case "Sunday":
-          hariIndo = "Minggu";
-          break;
+          hariIndo = "Minggu"
+          break
         default:
-          hariIndo = hari;
+          hariIndo = hari
       }
 
-      const sqlCek = "SELECT * FROM kegiatan WHERE tanggal = ? AND id_mahasiswa = ?";
+      const sqlCek = "SELECT * FROM kegiatan WHERE tanggal = ? AND id_mahasiswa = ?"
       db.query(sqlCek, [tanggalFormat, id_mahasiswa], (err, result) => {
-        if (err) throw err;
+        if (err) throw err
         if (result.length > 0) {
-          const sqlUpdate = "UPDATE kegiatan SET hari = ?, jam = CONCAT_WS(', ', jam, ?), kegiatan = CONCAT_WS(', ', kegiatan, ?) WHERE tanggal = ? AND id_mahasiswa = ?";
+          const sqlUpdate = "UPDATE kegiatan SET hari = ?, jam = CONCAT_WS(', ', jam, ?), kegiatan = CONCAT_WS(', ', kegiatan, ?) WHERE tanggal = ? AND id_mahasiswa = ?"
           db.query(sqlUpdate, [hariIndo, jam, kegiatan, tanggalFormat, id_mahasiswa], (err, result) => {
-            if (err) throw err;
-            res.redirect("/data-kegiatan");
-          });
+            if (err) throw err
+            res.redirect("/data-kegiatan")
+          })
         } else {
-          const insertSql = "INSERT INTO kegiatan (hari, tanggal, jam, kegiatan, id_mahasiswa) VALUES (?, ?, ?, ?, ?)";
+          const insertSql = "INSERT INTO kegiatan (hari, tanggal, jam, kegiatan, id_mahasiswa) VALUES (?, ?, ?, ?, ?)"
           db.query(insertSql, [hariIndo, tanggalFormat, jam, kegiatan, id_mahasiswa], (err, result) => {
-            if (err) throw err;
-            res.redirect("/data-kegiatan");
-          });
+            if (err) throw err
+            res.redirect("/data-kegiatan")
+          })
         }
-      });
-    });
+      })
+    })
 
     // tambah admin
-    app.get("/akun-mhs", (req, res) => {
+    app.get("/tambah-admin", (req, res) => {
       if (err) throw err
-      res.render("akun-mhs", { accountCreated: req.session.accountCreated })
+      res.render("tambah-admin", { accountCreated: req.session.accountCreated })
     })
 
     // insert tambah-admin
@@ -735,8 +760,8 @@ db.connect((err) => {
 
     // Route to show the create account page for admin
     app.get("/akun-admin", (req, res) => {
-      res.render("akun-admin", { accountCreated: req.session.accountCreated });
-    });
+      res.render("akun-admin", { accountCreated: req.session.accountCreated })
+    })
     
     // tambah kegiatan mhs
     app.get("/tambah-kegiatan-mhs", (req, res) => {
