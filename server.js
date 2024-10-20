@@ -251,65 +251,94 @@ db.connect((err) => {
       })
     })
   
-    // login page
+    // Halaman login
     app.post("/login", (req, res) => {
       const username = req.body.username;
       const password = req.body.password;
 
-      // Cari username di database akun
+      // Query untuk mencari pengguna di tabel akun
       db.query("SELECT * FROM akun WHERE username = ?", [username], (err, results) => {
-        if (err) {
-          console.log(err);
-        } else if (results.length > 0) {
-          const hashedPassword = results[0].password;
-          const role = results[0].role;
-          const accountId = results[0].user_id; // ID dari tabel akun
-          const id_mahasiswa = results[0].id_mahasiswa
+          if (err) {
+              console.error("Kesalahan pada database:", err);
+              return res.render("login", { error: "Kesalahan pada database." });
+          }
 
-          // Ambil ID dari tabel user berdasarkan accountId
-          db.query("SELECT * FROM user WHERE id = ?", [accountId], (err, userResults) => {
-            if (err) {
-              console.log(err);
-            } else if (userResults.length > 0) {
-              const userId = userResults[0].id; // ID dari tabel user
-              bcrypt.compare(password, hashedPassword, (err, isMatch) => {
-                if (err) {
-                  console.log(err);
-                } else if (isMatch) {
-                  // Jika password cocok, simpan ID yang tepat di session
-                  req.session.username = username;
-                  req.session.userId = userId; // Simpan ID dari tabel user
-                  req.session.accountId = accountId; // Simpan ID dari tabel akun
-                  req.session.id_mahasiswa = id_mahasiswa
+          if (results.length > 0) {
+              const hashedPassword = results[0].password;
+              const role = results[0].role;
+              const accountId = results[0].user_id;
+              const accountsId = results[0].admin_id;
+              const id_mahasiswa = results[0].id;
 
-                  // Render dashboard berdasarkan role
-                  if (role === 'admin') {
-                    const sql = "SELECT * FROM akun";
-                    db.query(sql, (err, result) => {
-                      const Akun = JSON.parse(JSON.stringify(result));
-                      res.render("dashboard", { akun: Akun, username: username });
-                    });
-                  } else if (role === 'mahasiswa') {
-                    const sql = "SELECT * FROM akun";
-                    db.query(sql, (err, result) => {
-                      const mahasiswa = JSON.parse(JSON.stringify(result));
-                      res.render("mahasiswa", { mahasiswa: mahasiswa, username: username });
-                    });
-                  }
-                } else {
-                  console.log("Invalid username or password.");
-                  res.render("login", { error: "Invalid username or password." });
-                }
-              });
-            } else {
-              console.log("User  not found.");
-              res.render("login", { error: "User  not found." });
-            }
-          });
-        } else {
-          console.log("Invalid username or password.");
-          res.render("login", { error: "Invalid username or password." });
-        }
+              // Ambil detail pengguna berdasarkan role
+              if (role === 'mahasiswa') {
+                  // Ambil detail dari tabel user
+                  db.query("SELECT * FROM user WHERE id = ?", [accountId], (err, userResults) => {
+                      if (err) {
+                          console.error("Kesalahan pada database:", err);
+                          return res.render("login", { error: "Kesalahan pada database." });
+                      }
+
+                      if (userResults.length > 0) {
+                          bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+                              if (err) {
+                                  console.error("Kesalahan saat membandingkan password:", err);
+                                  return res.render("login", { error: "Kesalahan saat membandingkan password." });
+                              }
+
+                              if (isMatch) {
+                                  req.session.id_mahasiswa = id_mahasiswa
+                                  req.session.username = username;
+                                  req.session.userId = userResults[0].id; // Set ID mahasiswa
+                                  res.redirect("/mahasiswa");
+                              } else {
+                                  console.log("Username atau password tidak valid.");
+                                  res.render("login", { error: "Username atau password tidak valid." });
+                              }
+                          });
+                      } else {
+                          console.log("Pengguna tidak ditemukan.");
+                          res.render("login", { error: "Pengguna tidak ditemukan." });
+                      }
+                  });
+              } else if (role === 'admin') {
+                  // Ambil detail dari tabel administrator
+                  db.query("SELECT * FROM administrator WHERE id = ?", [accountsId], (err, adminResults) => {
+                      if (err) {
+                          console.error("Kesalahan pada database:", err);
+                          return res.render("login", { error: "Kesalahan pada database." });
+                      }
+
+                      if (adminResults.length > 0) {
+                          bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+                              if (err) {
+                                  console.error("Kesalahan saat membandingkan password:", err);
+                                  return res.render("login", { error: "Kesalahan saat membandingkan password." });
+                              }
+
+                              if (isMatch) {
+                                  req.session.username = username;
+                                  req.session.id_mahasiswa = id_mahasiswa
+                                  req.session.adminId = adminResults[0].id; // Set ID admin
+                                  res.redirect("/dashboard");
+                              } else {
+                                  console.log("Username atau password tidak valid.");
+                                  res.render("login", { error: "Username atau password tidak valid." });
+                              }
+                          });
+                      } else {
+                          console.log("Admin tidak ditemukan.");
+                          res.render("login", { error: "Admin tidak ditemukan." });
+                      }
+                  });
+              } else {
+                  console.log("Role tidak dikenali.");
+                  res.render("login", { error: "Role tidak dikenali." });
+              }
+          } else {
+              console.log("Username atau password tidak valid.");
+              res.render("login", { error: "Username atau password tidak valid." });
+          }
       });
     });
 
