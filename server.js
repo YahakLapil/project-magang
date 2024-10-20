@@ -65,11 +65,11 @@ db.connect((err) => {
 
     // Insert database user
     app.post("/tambah", upload.any(), (req, res) => {
-      const insertSql = "INSERT INTO user (nama, univ, nim, mulai, akhir, foto) VALUES (?, ?, ?, ?, ?, ?)"
+      const insertSql = "INSERT INTO user (nama, univ, jurusan, nim, mulai, akhir, email, telepon, alamat, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       const filename = req.files[0].filename
       const filepath = `./uploads/${filename}`
 
-      db.query(insertSql, [req.body.nama, req.body.univ, req.body.nim, req.body.mulai, req.body.akhir, filename], (err, result) => {
+      db.query(insertSql, [req.body.nama, req.body.univ, req.body.jurusan, req.body.nim, req.body.mulai, req.body.akhir, req.body.email, req.body.telepon, req.body.alamat, filename], (err, result) => {
         if (err) throw err
         res.redirect("/data-mhs")
       })
@@ -253,51 +253,65 @@ db.connect((err) => {
   
     // login page
     app.post("/login", (req, res) => {
-      const username = req.body.username
-      const password = req.body.password
+      const username = req.body.username;
+      const password = req.body.password;
 
       // Cari username di database akun
       db.query("SELECT * FROM akun WHERE username = ?", [username], (err, results) => {
         if (err) {
-          console.log(err)
+          console.log(err);
         } else if (results.length > 0) {
-          // Jika username ditemukan di database akun
-          const hashedPassword = results[0].password
-          const role = results[0].role // tambahkan ini untuk mengecek role
-          const id_mahasiswa = results[0].id // tambahkan ini untuk mendapatkan ID mahasiswa
-          bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+          const hashedPassword = results[0].password;
+          const role = results[0].role;
+          const accountId = results[0].user_id; // ID dari tabel akun
+          const id_mahasiswa = results[0].id_mahasiswa
+
+          // Ambil ID dari tabel user berdasarkan accountId
+          db.query("SELECT * FROM user WHERE id = ?", [accountId], (err, userResults) => {
             if (err) {
-              console.log(err)
-            } else if (isMatch) {
-              // Jika password cocok, render dashboard berdasarkan role
-              req.session.username = username
-              req.session.id_mahasiswa = id_mahasiswa // tambahkan ini untuk menyimpan ID mahasiswa pada session
-              if (role === 'admin') {
-                const sql = "SELECT * FROM akun"
-                db.query(sql, (err, result) => {
-                  const Akun = JSON.parse(JSON.stringify(result))
-                  res.render("dashboard", { akun: Akun, username: username })
-                })
-              } else if (role === 'mahasiswa') {
-                const sql = "SELECT * FROM akun"
-                db.query(sql, (err, result) => {
-                  const mahasiswa = JSON.parse(JSON.stringify(result))
-                  res.render("mahasiswa", { mahasiswa: mahasiswa, username: username })
-                })
-              }
+              console.log(err);
+            } else if (userResults.length > 0) {
+              const userId = userResults[0].id; // ID dari tabel user
+              bcrypt.compare(password, hashedPassword, (err, isMatch) => {
+                if (err) {
+                  console.log(err);
+                } else if (isMatch) {
+                  // Jika password cocok, simpan ID yang tepat di session
+                  req.session.username = username;
+                  req.session.userId = userId; // Simpan ID dari tabel user
+                  req.session.accountId = accountId; // Simpan ID dari tabel akun
+                  req.session.id_mahasiswa = id_mahasiswa
+
+                  // Render dashboard berdasarkan role
+                  if (role === 'admin') {
+                    const sql = "SELECT * FROM akun";
+                    db.query(sql, (err, result) => {
+                      const Akun = JSON.parse(JSON.stringify(result));
+                      res.render("dashboard", { akun: Akun, username: username });
+                    });
+                  } else if (role === 'mahasiswa') {
+                    const sql = "SELECT * FROM akun";
+                    db.query(sql, (err, result) => {
+                      const mahasiswa = JSON.parse(JSON.stringify(result));
+                      res.render("mahasiswa", { mahasiswa: mahasiswa, username: username });
+                    });
+                  }
+                } else {
+                  console.log("Invalid username or password.");
+                  res.render("login", { error: "Invalid username or password." });
+                }
+              });
             } else {
-              // Jika password tidak cocok, render error
-              console.log("Invalid username or password.")
-              res.render("login", { error: "Invalid username or password." })
+              console.log("User  not found.");
+              res.render("login", { error: "User  not found." });
             }
-          })
+          });
         } else {
-          // Jika username tidak ditemukan di database akun, render error
-          console.log("Invalid username or password.")
-          res.render("login", { error: "Invalid username or password." })
+          console.log("Invalid username or password.");
+          res.render("login", { error: "Invalid username or password." });
         }
-      })
-    })
+      });
+    });
 
     // dashboard
     app.get("/dashboard", (req, res) => {
@@ -644,11 +658,22 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM akun"
-        db.query(sql, (err, result) => {
-          if (err) throw err
-          const mahasiswa = JSON.parse(JSON.stringify(result))
-          res.render("profil", { mahasiswa: mahasiswa, username: req.session.username })
+        const userId = req.session.userId
+        console.log("User  ID from session:", userId)
+        const sql = "SELECT * FROM user WHERE id = ?"
+
+        db.query(sql, [userId], (err, result) => {
+          if (err) {
+            console.error("Error fetching user data:", err); // Log error jika ada
+            return res.status(500).send("Error fetching user data");
+          }
+          if (result.length === 0) {
+            console.error("User  not found for ID:", userId); // Log jika tidak ada hasil
+            return res.status(404).send("User  not found"); // Jika tidak ada hasil
+          }
+
+          const userData = result[0]
+          res.render("profil", { userData: userData, username: req.session.username })
         })
       }
     })
