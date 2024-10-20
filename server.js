@@ -633,41 +633,102 @@ db.connect((err) => {
       });
     });
 
-  app.post("/tambah-absensi", (req, res) => {
-    const { status, alasan } = req.body; // Capture status and alasan from form
-    const id_mhs = req.session.id_mhs; // Get the mahasiswa ID from the session
-    const tanggal = moment().format("YYYY-MM-DD"); // Get the current date
-    const waktu = moment().format("HH:mm:ss"); // Get the current time
+//   app.post("/tambah-absensi", (req, res) => {
+//     const { status, alasan } = req.body; // Capture status and alasan from form
+//     const id_mhs = req.session.id_mhs; // Get the mahasiswa ID from the session
+//     const tanggal = moment().format("YYYY-MM-DD"); // Get the current date
+//     const waktu = moment().format("HH:mm:ss"); // Get the current time
 
-    // Cek apakah sudah melakukan absensi hari ini
-    if (req.session.hasSubmittedAttendance && req.session.lastAttendanceDate === tanggal && req.session.lastIdMhs === id_mhs) {
-        return res.status(400).send("Anda sudah melakukan absensi hari ini."); // Berikan pesan jika sudah absensi
-    }
+//     // Cek apakah sudah melakukan absensi hari ini
+//     if (req.session.hasSubmittedAttendance && req.session.lastAttendanceDate === tanggal && req.session.lastIdMhs === id_mhs) {
+//         return res.status(400).send("Anda sudah melakukan absensi hari ini."); // Berikan pesan jika sudah absensi
+//     }
 
-    const sqlPengaturan = "SELECT jam_buka, jam_tutup FROM pengaturan_absensi LIMIT 1";
-    db.query(sqlPengaturan, (err, result) => {
-        if (err) throw err;
-        const pengaturan = result[0];
-        const jamBuka = moment(pengaturan.jam_buka, "HH:mm:ss");
-        const jamTutup = moment(pengaturan.jam_tutup, "HH:mm:ss");
-        const currentTime = moment(waktu, "HH:mm:ss");
+//     const sqlPengaturan = "SELECT jam_buka, jam_tutup FROM pengaturan_absensi LIMIT 1";
+//     db.query(sqlPengaturan, (err, result) => {
+//         if (err) throw err;
+//         const pengaturan = result[0];
+//         const jamBuka = moment(pengaturan.jam_buka, "HH:mm:ss");
+//         const jamTutup = moment(pengaturan.jam_tutup, "HH:mm:ss");
+//         const currentTime = moment(waktu, "HH:mm:ss");
 
-        if (currentTime.isBetween(jamBuka, jamTutup, null, '[]')) {
-            const insertSql = "INSERT INTO absensi (id_mhs, hari, tanggal, waktu, status, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
-            db.query(insertSql, [id_mhs, moment().format("dddd"), tanggal, waktu, status, alasan], (err, result) => {
-                if (err) {
-                    console.error("Error inserting attendance:", err);
-                    return res.status(500).send("Error inserting attendance");
-                }
-                req.session.hasSubmittedAttendance = true; // Set session variable
-                req.session.lastAttendanceDate = tanggal; // Simpan tanggal absensi
-                req.session.lastIdMhs = id_mhs; // Simpan ID mahasiswa
-                res.redirect("/absensi");
-            });
-        } else {
-            res.status(400).send("Waktu untuk melakukan absensi sudah lewat");
+//         if (currentTime.isBetween(jamBuka, jamTutup, null, '[]')) {
+//             const insertSql = "INSERT INTO absensi (id_mhs, hari, tanggal, waktu, status, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
+//             const keterangan = status === "Hadir" ? null : alasan;
+
+//             db.query(insertSql, [id_mhs, moment().format("dddd"), tanggal, waktu, status, alasan], (err, result) => {
+//                 if (err) {
+//                     console.error("Error inserting attendance:", err);
+//                     return res.status(500).send("Error inserting attendance");
+//                 }
+//                 req.session.hasSubmittedAttendance = true; // Set session variable
+//                 req.session.lastAttendanceDate = tanggal; // Simpan tanggal absensi
+//                 req.session.lastIdMhs = id_mhs; // Simpan ID mahasiswa
+//                 res.redirect("/absensi");
+//             });
+//         } else {
+//             res.status(400).send("Waktu untuk melakukan absensi sudah lewat");
+//         }
+//     });
+// });
+app.post("/tambah-absensi", (req, res) => {
+  const { status, alasan, id_mhs } = req.body; // Ambil id_mhs dari body
+  const tanggal = moment().format("YYYY-MM-DD"); // Ambil tanggal saat ini
+  const waktu = moment().format("HH:mm:ss"); // Ambil waktu saat ini
+
+  // Cek apakah sudah melakukan absensi hari ini
+  if (req.session.hasSubmittedAttendance && req.session.lastAttendanceDate === tanggal && req.session.lastIdMhs === id_mhs) {
+      return res.status(400).send("Anda sudah melakukan absensi hari ini."); // Berikan pesan jika sudah absensi
+  }
+
+  const sqlPengaturan = "SELECT jam_buka, jam_tutup FROM pengaturan_absensi LIMIT 1";
+  db.query(sqlPengaturan, (err, result) => {
+      if (err) throw err;
+      const pengaturan = result[0];
+      const jamBuka = moment(pengaturan.jam_buka, "HH:mm:ss");
+      const jamTutup = moment(pengaturan.jam_tutup, "HH:mm:ss");
+      const currentTime = moment(waktu, "HH:mm:ss");
+
+      if (currentTime.isBetween(jamBuka, jamTutup, null, '[]')) {
+        // Validasi keterangan
+        let keterangan = null;
+        const insertSql = "INSERT INTO absensi (id_mhs, hari, tanggal, waktu, status, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
+        if (status === "Hadir") {
+            // Jika status 'Hadir', keterangan adalah null
+            keterangan = null;
+        } else if (status === "Izin" || status === "Sakit") {
+            // Jika status 'Izin' atau 'Sakit', pastikan keterangan tidak kosong
+            if (!alasan || alasan.trim() === "") {
+                return res.status(400).send("Keterangan tidak boleh kosong untuk status 'Izin' atau 'Sakit'.");
+            }
+            keterangan = alasan; // Simpan keterangan
         }
-    });
+
+          db.query(insertSql, [id_mhs, moment().format("dddd"), tanggal, waktu, status, keterangan], (err, result) => {
+              if (err) {
+                  console.error("Error inserting attendance:", err);
+                  return res.status(500).send("Error inserting attendance");
+              }
+              req.session.hasSubmittedAttendance = true; // Set session variable
+              req.session.lastAttendanceDate = tanggal; // Simpan tanggal absensi
+              req.session.lastIdMhs = id_mhs; // Simpan ID mahasiswa
+              res.redirect("/absensi");
+          });
+      } else {
+          res.status(400).send("Waktu untuk melakukan absensi sudah lewat");
+      }
+  });
+});
+app.get("/check-absensi/:id_mhs", (req, res) => {
+  const id_mhs = req.params.id_mhs;
+  const tanggal = moment().format("YYYY-MM-DD");
+
+  const sql = "SELECT COUNT(*) AS count FROM absensi WHERE id_mhs = ? AND tanggal = ?";
+  db.query(sql, [id_mhs, tanggal], (err, result) => {
+      if (err) throw err;
+      const hasSubmitted = result[0].count > 0; // Jika count lebih dari 0, berarti sudah absen
+      res.json({ hasSubmitted }); // Mengembalikan status absensi dalam format JSON
+  });
 });
 
     // mahasiswa
@@ -688,6 +749,8 @@ db.connect((err) => {
         const userId = req.session.userId
         const tanggalSekarang = moment().format("DD-MM-YYYY")
         const sql = "SELECT * FROM user WHERE id = ?"
+        const sqlAbsensi = "SELECT * FROM absensi WHERE id_mhs = ? AND tanggal = ?";
+        
         db.query(sql, [userId], (err, result) => {
           if (err) {
             console.error("Error fetching user data:", err); // Log error jika ada
@@ -699,8 +762,14 @@ db.connect((err) => {
           }
 
           const userData = result[0]
-          res.render("absensi", { userData: userData, username: req.session.username, tanggal: tanggalSekarang })
+          db.query(sqlAbsensi, [userData.id, tanggalSekarang], (err, absensiResult) => {
+            if (err) {
+              console.error("Error fetching attendance data:", err);
+              return res.status(500).send("Error fetching attendance data");
+            }
+          res.render("absensi", { userData: userData, username: req.session.username, tanggal: tanggalSekarang, absensiData: absensiResult })
         })
+      })
       }
     })
 

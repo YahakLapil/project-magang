@@ -54,14 +54,26 @@
                             <th scope="row">Tanggal</th>
                             <td>:   <%= tanggal %></td>
                           </tr>
-                          <tr>
-                            <th scope="row">Waktu</th>
-                            <td>:   Belum Absensi</td>
-                          </tr>
-                          <tr>
-                            <th scope="row">Status</th>
-                            <td>:   Belum Absensi</td>
-                          </tr>
+                          <% if (absensiData.length > 0) { %>
+                            <% const absensi = absensiData[0]; %>
+                            <tr>
+                                <th scope="row">Waktu</th>
+                                <td>:   <%= absensi.waktu %></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Status</th>
+                                <td>:   <%= absensi.status %></td>
+                            </tr>
+                        <% } else { %>
+                            <tr>
+                                <th scope="row">Waktu</th>
+                                <td>:   Belum Absensi</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Status</th>
+                                <td>:   Belum Absensi</td>
+                            </tr>
+                        <% } %>
                         </tbody>
                       </table>
                       <a href="/absen-mhs" class="btn btn-success bi-clock-fill"> Absensi</a>
