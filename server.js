@@ -350,46 +350,39 @@ db.connect((err) => {
       res.render("akun-mhs", { accountCreated: req.session.accountCreated })
     })
 
+    // Route to show the create account page for admin
+    app.get("/akun-admin", (req, res) => {
+      if (err) throw err
+      res.render("akun-admin", { accountCreated: req.session.accountCreated })
+    })
+
     // Route to show the create account page for a specific user
     app.get("/akun-mhs/:id", (req, res) => {
-      const userId = req.params.id // Get the user ID from the URL
-      const sql = "SELECT * FROM akun WHERE id = ?" // Assuming user_id is the foreign key in akun table
+      const userId = req.params.id; // Get the user ID from the URL
+      const sql = "SELECT * FROM akun WHERE user_id = ?"; // Assuming user_id is the foreign key in akun table
 
       db.query(sql, [userId], (err, result) => {
-        if (err) throw err
+          if (err) throw err;
 
-        // Check if an account exists for the user ID
-        if (result.length > 0) {
-          req.session.accountCreated = true // Set session variable if account exists
-        } else {
-          req.session.accountCreated = false // Set session variable if account does not exist
-        }
+          // Check if an account exists for the user ID
+          req.session.accountCreated = result.length > 0; // Set session variable based on existence of account
+          res.render("akun-mhs", { accountCreated: req.session.accountCreated });
+      });
+    });
 
-        // Render the account creation page
-        res.render("akun-mhs", { accountCreated: req.session.accountCreated })
-      })
-    })
-
-    // Route to show the create account page for a specific user
+    // Route to show the create account page for a specific admin
     app.get("/akun-admin/:id", (req, res) => {
-      const adminId = req.params.id // Get the user ID from the URL
-      const sql = "SELECT * FROM akun WHERE id = ?" // Assuming user_id is the foreign key in akun table
-      console.log("adminId = ", adminId)
+      const adminId = req.params.id; // Get the admin ID from the URL
+      const sql = "SELECT * FROM akun WHERE admin_id = ?"; // Assuming admin_id is the foreign key in akun table
 
       db.query(sql, [adminId], (err, result) => {
-        if (err) throw err
+          if (err) throw err;
 
-        // Check if an account exists for the user ID
-        if (result.length > 0) {
-          req.session.accountCreated = true // Set session variable if account exists
-        } else {
-          req.session.accountCreated = false // Set session variable if account does not exist
-        }
-
-        // Render the account creation page
-        res.render("akun-admin", { accountCreated: req.session.accountCreated, adminId: adminId })
-      })
-    })
+          // Check if an account exists for the admin ID
+          req.session.accountCreated = result.length > 0; // Set session variable based on existence of account
+          res.render("akun-admin", { accountCreated: req.session.accountCreated, adminId: adminId });
+      });
+    });
 
     // Route to handle admin account creation
     app.post("/tambah-akun", (req, res) => {
@@ -756,11 +749,6 @@ db.connect((err) => {
     app.get("/absen-mhs", (req, res) => {
       if (err) throw err
       res.render("absen-mhs")
-    })
-
-    // Route to show the create account page for admin
-    app.get("/akun-admin", (req, res) => {
-      res.render("akun-admin", { accountCreated: req.session.accountCreated })
     })
     
     // tambah kegiatan mhs

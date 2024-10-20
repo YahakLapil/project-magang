@@ -32,8 +32,10 @@
                     </div>
                 </form>
                 <% if (accountCreated) { %>
-                  <p>Akun admin sudah dibuat</p>
-                <% } %>
+                  <p>Akun sudah ada untuk pengguna ini.</p>
+              <% } else { %>
+                  <p>Tidak ada akun untuk pengguna ini. Silakan buat akun baru.</p>
+              <% } %>
             </div>
         </div>
     </div>

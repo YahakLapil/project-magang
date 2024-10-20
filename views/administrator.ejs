@@ -65,7 +65,7 @@
                           <th scope="row"><%= admins.nip %></th>
                           <th scope="row"><%= admins.email %></th>
                           <th scope="row">
-                            <a href="/akun-admin" class="btn btn-primary bi-person-fill"></a>
+                            <a href="/akun-admin/<%= admins.id %>" class="btn btn-primary bi-person-fill"></a>
                             <a href="/edit-admin/<%= admins.id %>" class="btn btn-warning edit bi-pencil-square"></a>
                             <a href="/delete-admin/<%= admins.id %>" class="btn btn-danger bi-trash-fill" onclick="return confirm('Are you sure you want to delete this admin?')"></a>
                       </tr>
