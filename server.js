@@ -288,6 +288,7 @@ db.connect((err) => {
 
                               if (isMatch) {
                                   req.session.id_mahasiswa = id_mahasiswa
+                                  req.session.id_mhs = accountId
                                   req.session.username = username;
                                   req.session.userId = userResults[0].id; // Set ID mahasiswa
                                   res.redirect("/mahasiswa");
@@ -318,6 +319,7 @@ db.connect((err) => {
 
                               if (isMatch) {
                                   req.session.username = username;
+                                  req.session.id_mhs = accountId
                                   req.session.id_mahasiswa = id_mahasiswa
                                   req.session.adminId = adminResults[0].id; // Set ID admin
                                   res.redirect("/dashboard");
@@ -601,20 +603,72 @@ db.connect((err) => {
         })
       }
     })
-    
-    // pengaturan
+
+    // Halaman pengaturan waktu absensi
     app.get("/pengaturan", (req, res) => {
       if (!req.session.username) {
-        res.redirect("/login")
+          res.redirect("/login");
       } else {
-        const sql = "SELECT * FROM akun"
-        db.query(sql, (err, result) => {
-          if (err) throw err
-          const akun = JSON.parse(JSON.stringify(result))
-          res.render("pengaturan", { akun: akun, username: req.session.username })
-        })
+          const sql = "SELECT * FROM pengaturan_absensi LIMIT 1"; // Ambil pengaturan yang ada
+          db.query(sql, (err, result) => {
+              if (err) throw err;
+              const pengaturan = result.length > 0 ? result[0] : { jam_buka: '08:00:00', jam_tutup: '17:00:00' }; // Default jika tidak ada pengaturan
+              res.render("pengaturan", { pengaturan, username: req.session.username });
+          });
       }
-    })
+    });
+
+    // Route untuk menyimpan pengaturan waktu absensi
+    app.post("/simpan-pengaturan-absensi", (req, res) => {
+      const { jam_buka, jam_tutup } = req.body;
+
+      if (jam_buka >= jam_tutup) {
+        return res.render("pengaturan", { error: "Jam buka harus lebih awal dari jam tutup.", pengaturan: req.body, username: req.session.username });
+    }
+
+      const sql = "INSERT INTO pengaturan_absensi (jam_buka, jam_tutup) VALUES (?, ?) ON DUPLICATE KEY UPDATE jam_buka = ?, jam_tutup = ?";
+      db.query(sql, [jam_buka, jam_tutup, jam_buka, jam_tutup], (err, result) => {
+          if (err) throw err;
+          res.redirect("/pengaturan"); // Redirect setelah menyimpan pengaturan
+      });
+    });
+
+  app.post("/tambah-absensi", (req, res) => {
+    const { status, alasan } = req.body; // Capture status and alasan from form
+    const id_mhs = req.session.id_mhs; // Get the mahasiswa ID from the session
+    const tanggal = moment().format("YYYY-MM-DD"); // Get the current date
+    const waktu = moment().format("HH:mm:ss"); // Get the current time
+
+    // Cek apakah sudah melakukan absensi hari ini
+    if (req.session.hasSubmittedAttendance && req.session.lastAttendanceDate === tanggal && req.session.lastIdMhs === id_mhs) {
+        return res.status(400).send("Anda sudah melakukan absensi hari ini."); // Berikan pesan jika sudah absensi
+    }
+
+    const sqlPengaturan = "SELECT jam_buka, jam_tutup FROM pengaturan_absensi LIMIT 1";
+    db.query(sqlPengaturan, (err, result) => {
+        if (err) throw err;
+        const pengaturan = result[0];
+        const jamBuka = moment(pengaturan.jam_buka, "HH:mm:ss");
+        const jamTutup = moment(pengaturan.jam_tutup, "HH:mm:ss");
+        const currentTime = moment(waktu, "HH:mm:ss");
+
+        if (currentTime.isBetween(jamBuka, jamTutup, null, '[]')) {
+            const insertSql = "INSERT INTO absensi (id_mhs, hari, tanggal, waktu, status, keterangan) VALUES (?, ?, ?, ?, ?, ?)";
+            db.query(insertSql, [id_mhs, moment().format("dddd"), tanggal, waktu, status, alasan], (err, result) => {
+                if (err) {
+                    console.error("Error inserting attendance:", err);
+                    return res.status(500).send("Error inserting attendance");
+                }
+                req.session.hasSubmittedAttendance = true; // Set session variable
+                req.session.lastAttendanceDate = tanggal; // Simpan tanggal absensi
+                req.session.lastIdMhs = id_mhs; // Simpan ID mahasiswa
+                res.redirect("/absensi");
+            });
+        } else {
+            res.status(400).send("Waktu untuk melakukan absensi sudah lewat");
+        }
+    });
+});
 
     // mahasiswa
     app.get("/mahasiswa", (req, res) => {
@@ -631,11 +685,21 @@ db.connect((err) => {
       if (!req.session.username) {
         res.redirect("/login")
       } else {
-        const sql = "SELECT * FROM akun"
-        db.query(sql, (err, result) => {
-          if (err) throw err
-          const mahasiswa = JSON.parse(JSON.stringify(result))
-          res.render("absensi", { mahasiswa: mahasiswa, username: req.session.username })
+        const userId = req.session.userId
+        const tanggalSekarang = moment().format("DD-MM-YYYY")
+        const sql = "SELECT * FROM user WHERE id = ?"
+        db.query(sql, [userId], (err, result) => {
+          if (err) {
+            console.error("Error fetching user data:", err); // Log error jika ada
+            return res.status(500).send("Error fetching user data");
+          }
+          if (result.length === 0) {
+            console.error("User  not found for ID:", userId); // Log jika tidak ada hasil
+            return res.status(404).send("User  not found"); // Jika tidak ada hasil
+          }
+
+          const userData = result[0]
+          res.render("absensi", { userData: userData, username: req.session.username, tanggal: tanggalSekarang })
         })
       }
     })
@@ -799,11 +863,44 @@ db.connect((err) => {
       res.render("mulai-absen")
     })
 
-    // absen mhs
-    app.get("/absen-mhs", (req, res) => {
-      if (err) throw err
-      res.render("absen-mhs")
-    })
+  app.get("/absen-mhs", (req, res) => {
+    if (!req.session.username) {
+        res.redirect("/login");
+    } else {
+        const userId = req.session.userId;
+        const sqlUser   = "SELECT * FROM user WHERE id = ?";
+        const sqlPengaturan = "SELECT jam_buka, jam_tutup FROM pengaturan_absensi LIMIT 1";
+
+        db.query(sqlUser  , [userId], (err, userResult) => {
+            if (err) throw err;
+            if (userResult.length === 0) {
+                return res.status(404).send("User  not found");
+            }
+
+            const tanggalHariIni = moment().format("YYYY-MM-DD");
+            const tanggalAbsensi = req.session.lastAttendanceDate || "";
+
+            // Reset status jika hari ini adalah hari baru
+            if (tanggalAbsensi !== tanggalHariIni) {
+                req.session.hasSubmittedAttendance = false; // Reset status
+                req.session.lastAttendanceDate = tanggalHariIni; // Simpan tanggal absensi
+                req.session.lastIdMhs = null; // Reset ID mahasiswa
+            }
+
+            db.query(sqlPengaturan, (err, pengaturanResult) => {
+                if (err) throw err;
+                const pengaturan = pengaturanResult[0] || { jam_buka: '00:00:00', jam_tutup: '23:59:59' };
+
+                res.render("absen-mhs", {
+                    userData: userResult[0],
+                    username: req.session.username,
+                    pengaturan: pengaturan,
+                    hasSubmittedAttendance: req.session.hasSubmittedAttendance || false // Kirim status ke view
+                });
+            });
+        });
+    }
+});
     
     // tambah kegiatan mhs
     app.get("/tambah-kegiatan-mhs", (req, res) => {
