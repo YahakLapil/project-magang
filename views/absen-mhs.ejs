@@ -6,26 +6,61 @@
     <title>Mulai Absensi</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
+    <style>
+        .sts{
+          display: block;
+        }
+    </style>
 </head>
 <body>
   <div class="container">
-    <form action="/tambah" method="post" enctype="multipart/form-data">
+    <form id="absensi-form" action="/tambah-absensi" method="post">
       <h3 class="mt-5">MULAI ABSENSI</h3>
-        <div class="row mb-3">
+        <div class="row mb-3 sts">
           <label for="status" class="col-sm-2 col-form-label">Status</label>
           <div class="col-sm-10">
-            <select class="form-select">
-              <option value="1">Hadir</option>
-              <option value="2">Izin</option>
-              <option value="3">Sakit</option>
+            <select id="status" name="status" class="form-select" required>
+              <option value="Hadir">Hadir</option>
+              <option value="Izin">Izin</option>
+              <option value="Sakit">Sakit</option>
             </select>
           </div>
         </div>
-      <input type="submit" class="btn btn-success" value="Absensi">
-      <a class="btn btn-danger" href="/absensi"> Batal</a>
+        <div id="keterangan-container" style="display: none;" class="row mb-3">
+          <label for="alasan" class="col-sm-2 col-form-label">Keterangan</label>
+          <div class="col-sm-10">
+            <textarea class="form-control mb-2" name="alasan" required></textarea>
+          </div>
+        </div>
+        <div id="absensi-status">
+          <p id="current-time"></p>
+          <p id="current-status"></p>
+        </div>
+        <input type="submit" id="absensi-button" class="btn btn-success" value="Absensi" <% if (hasSubmittedAttendance) { %> disabled <% } %>>
+        <a class="btn btn-danger" href="/absensi"> Batal</a>
     </form>
   </div>
-    
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
+
+  <script src="/bootstrap/js/bootstrap.min.js"></script>
+  <script>
+    document.getElementById('status').addEventListener('change', function() {
+        const keteranganContainer = document.getElementById('keterangan-container');
+        keteranganContainer.style.display = (this.value === 'Izin' || this.value === 'Sakit') ? 'block' : 'none';
+    });
+
+    const jamBuka = "<%= pengaturan.jam_buka %>";
+    const jamTutup = "<%= pengaturan.jam_tutup %>";
+
+    const currentTime = moment(); // Menggunakan moment untuk mendapatkan waktu saat ini
+    const buka = moment(`${currentTime.format("YYYY-MM-DD")} ${jamBuka}`, "YYYY-MM-DD HH:mm");
+    const tutup = moment(`${currentTime.format("YYYY-MM-DD")} ${jamTutup}`, "YYYY-MM-DD HH:mm");
+
+    if (currentTime.isBefore(buka) || currentTime.isAfter(tutup)) {
+        document.getElementById('absensi-button').disabled = true;
+        alert("Waktu untuk melakukan absensi sudah lewat atau belum dimulai");
+    } else {
+        document.getElementById('absensi-button').disabled = false;
+    }
+  </script>
 </body>
 </html>
