@@ -15,6 +15,7 @@
 <body>
   <div class="container">
     <form id="absensi-form" action="/tambah-absensi" method="post">
+      <input type="hidden" name="id_mhs" value="<%= userData.id %>">
       <h3 class="mt-5">MULAI ABSENSI</h3>
         <div class="row mb-3 sts">
           <label for="status" class="col-sm-2 col-form-label">Status</label>
@@ -29,15 +30,15 @@
         <div id="keterangan-container" style="display: none;" class="row mb-3">
           <label for="alasan" class="col-sm-2 col-form-label">Keterangan</label>
           <div class="col-sm-10">
-            <textarea class="form-control mb-2" name="alasan" required></textarea>
+            <textarea class="form-control mb-2" name="alasan"></textarea>
           </div>
         </div>
         <div id="absensi-status">
           <p id="current-time"></p>
           <p id="current-status"></p>
         </div>
-        <input type="submit" id="absensi-button" class="btn btn-success" value="Absensi" <% if (hasSubmittedAttendance) { %> disabled <% } %>>
-        <a class="btn btn-danger" href="/absensi"> Batal</a>
+      <input type="submit" id="absensi-button" class="btn btn-success" value="Absensi">
+      <a class="btn btn-danger" href="/absensi"> Batal</a>
     </form>
   </div>
 
@@ -61,6 +62,22 @@
     } else {
         document.getElementById('absensi-button').disabled = false;
     }
+    // Cek apakah mahasiswa sudah melakukan absensi
+const checkAbsensiStatus = async (id_mhs) => {
+    const response = await fetch(`/check-absensi/${id_mhs}`);
+    const data = await response.json();
+    return data.hasSubmitted; // Mengembalikan status absensi
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const id_mhs = "<%= userData.id %>"; // Ambil ID mahasiswa dari EJS
+    const hasSubmitted = await checkAbsensiStatus(id_mhs);
+
+    if (hasSubmitted) {
+        document.getElementById('absensi-button').disabled = true;
+        alert("Anda sudah melakukan absensi hari ini.");
+    }
+});
   </script>
 </body>
 </html>
