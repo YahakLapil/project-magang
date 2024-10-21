@@ -6,26 +6,33 @@
     <title>Tambah Absensi</title>
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="bootstrap-icons/font/bootstrap-icons.min.css">
+    <style>
+      .nm, .st, .tg, .ab {
+        display: block;
+      }
+    </style>
 </head>
 <body>
   <div class="container">
-    <form action="/tambah-absensi" method="post">
+    <form action="/tambah-absensi1" method="post">
       <h3 class="mt-5">TAMBAH ABSENSI</h3>
-      <div class="row mb-3">
+      <div class="row mb-3 nm">
         <label for="nama" class="col-sm-2 col-form-label">Nama Mahasiswa</label>
         <div class="col-sm-10">
           <select name="id_mhs" class="form-select" required>
             <option value="">Pilih Mahasiswa</option>
             <% mahasiswa.forEach((mhs) => { %>
-              <option value="<% mhs.id %>"><%= mhs.nama %></option>
+              <% if (idMhsArray.includes(mhs.id)) { %>
+                <option value="<%= mhs.id %>"><%= mhs.nama %></option>
+              <% } %>
             <% }) %>
           </select>
         </div>
       </div>
-      <div class="row mb-3">
+      <div class="row mb-3 st">
         <label for="status" class="col-sm-2 col-form-label">Status</label>
         <div class="col-sm-10">
-          <select name="status" class="form-select" required>
+          <select name="status" class="form-select" required id="statusSelect">
             <option value="Hadir">Hadir</option>
             <option value="Izin">Izin</option>
             <option value="Sakit">Sakit</option>
@@ -33,22 +40,16 @@
           </select>
         </div>
       </div>
-      <div class="row mb-3">
-        <label for="tanggals" class="col-sm-2 col-form-label">Tanggal Absensi</label>
+      <div class="row mb-3 tg">
+        <label for="tanggal" class="col-sm-2 col-form-label">Tanggal Absensi</label>
         <div class="col-sm-10">
-          <input type="date" name="tanggals" class="form-control" required>
+          <input type="date" name="tanggal" class="form-control" required>
         </div>
       </div>
-      <div class="row mb-3">
-        <label for="waktus" class="col-sm-2 col-form-label">Waktu Absensi</label>
-        <div class="col-sm-10">
-          <input type="time" name="waktus" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
+      <div class="row mb-3" id="alasanContainer" style="display: none;">
         <label for="alasan" class="col-sm-2 col-form-label">Keterangan</label>
         <div class="col-sm-10">
-          <input type="text" name="alasan" class="form-control" required>
+          <textarea class="form-control mb-2" name="alasan" placeholder="Masukkan keterangan jika Izin atau Sakit"></textarea>
         </div>
       </div>
       <input type="submit" class="btn btn-success" value="Simpan">
@@ -57,6 +58,17 @@
     </form>
   </div>
     
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
+  <script>
+    document.getElementById('statusSelect').addEventListener('change', function() {
+        const alasanContainer = document.getElementById('alasanContainer');
+        if (this.value === 'Izin' || this.value === 'Sakit') {
+            alasanContainer.style.display = 'block'; // Tampilkan input alasan
+        } else {
+            alasanContainer.style.display = 'none'; // Sembunyikan input alasan
+        }
+    });
+  </script>
+  
+  <script src="/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>
