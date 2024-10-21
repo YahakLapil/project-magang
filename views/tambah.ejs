@@ -9,72 +9,76 @@
 </head>
 <body>
   <div class="container">
-    <form action="/tambah" method="post" enctype="multipart/form-data">
-      <h3 class="mt-5">TAMBAH ANAK MAGANG BARU</h3>
-      <div class="row mb-3">
-        <label for="nama" class="col-sm-2 col-form-label">Nama</label>
-        <div class="col-sm-10">
-          <input type="text" name="nama" class="form-control" required>
-        </div>
+    <div class="card mt-5 mb-5">
+      <h5 class="card-header p-3">TAMBAH ANAK MAGANG BARU</h5>
+      <div class="card-body mt-3">
+        <form action="/tambah" method="post" enctype="multipart/form-data">
+          <div class="row mb-3">
+            <label for="nama" class="col-sm-2 col-form-label">Nama</label>
+            <div class="col-sm-10">
+              <input type="text" name="nama" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="univ" class="col-sm-2 col-form-label">Universitas</label>
+            <div class="col-sm-10">
+              <input type="text" name="univ" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="jurusan" class="col-sm-2 col-form-label">Jurusan</label>
+            <div class="col-sm-10">
+              <input type="text" name="jurusan" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="nim" class="col-sm-2 col-form-label">NIM</label>
+            <div class="col-sm-10">
+              <input type="text" name="nim" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="mulai" class="col-sm-2 col-form-label">Mulai Magang</label>
+            <div class="col-sm-10">
+              <input type="date" name="mulai" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="akhir" class="col-sm-2 col-form-label">Akhir Magang</label>
+            <div class="col-sm-10">
+              <input type="date" name="akhir" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="email" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+              <input type="email" name="email" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="telepon" class="col-sm-2 col-form-label">No Telp</label>
+            <div class="col-sm-10">
+              <input type="text" name="telepon" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="alamat" class="col-sm-2 col-form-label">Alamat</label>
+            <div class="col-sm-10">
+              <textarea class="form-control mb-2" name="alamat" required></textarea>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="filename" class="col-sm-2 col-form-label">Foto</label>
+            <div class="col-sm-10">
+              <input type="file" name="filename" class="form-control" required accept="image/*">
+            </div>
+          </div>
+          <input type="submit" class="btn btn-success" value="Simpan">
+          <button class="btn btn-warning" type="reset"> Reset</button>
+          <a class="btn btn-danger" href="/data-mhs"> Batal</a>
+        </form>
       </div>
-      <div class="row mb-3">
-        <label for="univ" class="col-sm-2 col-form-label">Universitas</label>
-        <div class="col-sm-10">
-          <input type="text" name="univ" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="jurusan" class="col-sm-2 col-form-label">Jurusan</label>
-        <div class="col-sm-10">
-          <input type="text" name="jurusan" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="nim" class="col-sm-2 col-form-label">NIM</label>
-        <div class="col-sm-10">
-          <input type="text" name="nim" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="mulai" class="col-sm-2 col-form-label">Mulai Magang</label>
-        <div class="col-sm-10">
-          <input type="date" name="mulai" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="akhir" class="col-sm-2 col-form-label">Akhir Magang</label>
-        <div class="col-sm-10">
-          <input type="date" name="akhir" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="email" class="col-sm-2 col-form-label">Email</label>
-        <div class="col-sm-10">
-          <input type="email" name="email" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="telepon" class="col-sm-2 col-form-label">No Telp</label>
-        <div class="col-sm-10">
-          <input type="text" name="telepon" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="alamat" class="col-sm-2 col-form-label">Alamat</label>
-        <div class="col-sm-10">
-          <textarea class="form-control mb-2" name="alamat" required></textarea>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="filename" class="col-sm-2 col-form-label">Foto</label>
-        <div class="col-sm-10">
-          <input type="file" name="filename" class="form-control" required accept="image/*">
-        </div>
-      </div>
-      <input type="submit" class="btn btn-success" value="Simpan">
-      <button class="btn btn-warning" type="reset"> Reset</button>
-      <a class="btn btn-danger" href="/data-mhs"> Batal</a>
-    </form>
+    </div>
   </div>
     
     <script src="/bootstrap/js/bootstrap.min.js"></script>

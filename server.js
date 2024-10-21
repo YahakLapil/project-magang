@@ -1112,7 +1112,59 @@ app.get("/tambah-absen", (req, res) => {
       res.render("tambah-kegiatan-mhs", { id_mahasiswa: req.session.id_mahasiswa })
     })
 
-  })
+    })
+
+    // Route untuk menampilkan form ubah password
+    app.get("/ubah-password", (req, res) => {
+      if (!req.session.username) {
+          return res.redirect("/login");
+      }
+      res.render("ubah-password", { username: req.session.username });
+    });
+
+    // Route untuk menangani pembaruan password
+    app.post("/update-password", (req, res) => {
+      const userId = req.session.userId; // Ambil ID pengguna dari session
+      const { passwordLama, passwordBaru, passwordKonfirm } = req.body;
+
+      // Cek apakah password baru dan konfirmasi password cocok
+      if (passwordBaru !== passwordKonfirm) {
+          return res.render("ubah-password", { username: req.session.username, error: "Password baru tidak cocok." });
+      }
+
+      // Ambil password hashed pengguna dari database
+      const sql = "SELECT password FROM akun WHERE user_id = ?";
+      db.query(sql, [userId], (err, results) => {
+          if (err) throw err;
+
+          if (results.length > 0) {
+              const hashedPassword = results[0].password;
+
+              // Bandingkan password saat ini dengan password hashed
+              bcrypt.compare(passwordLama, hashedPassword, (err, isMatch) => {
+                  if (err) throw err;
+
+                  if (isMatch) {
+                      // Hash password baru
+                      bcrypt.hash(passwordBaru, 10, (err, hashedpasswordBaru) => {
+                          if (err) throw err;
+
+                          // Perbarui password di database
+                          const updateSql = "UPDATE akun SET password = ? WHERE user_id = ?";
+                          db.query(updateSql, [hashedpasswordBaru, userId], (err) => {
+                              if (err) throw err;
+                              res.redirect("/profil"); // Redirect ke halaman sukses atau kembali ke dashboard
+                          });
+                      });
+                  } else {
+                      res.render("ubah-password", { username: req.session.username, error: "Password saat ini salah." });
+                  }
+              });
+          } else {
+              res.render("ubah-password", { username: req.session.username, error: "Pengguna tidak ditemukan." });
+          }
+      });
+    });
 
 // buat localhost 3000
 app.listen(3000, () => {

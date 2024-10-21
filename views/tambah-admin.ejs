@@ -9,31 +9,34 @@
 </head>
 <body>
   <div class="container">
-    <form action="/tambah-adm" method="post">
-      <h3 class="mt-5">TAMBAH ADMINISTRATOR</h3>
-      <div class="row mb-3">
-        <label for="nama" class="col-sm-2 col-form-label">Nama Lengkap</label>
-        <div class="col-sm-10">
-          <input type="text" name="nama" class="form-control" required>
-        </div>
+    <div class="card mt-5">
+      <h5 class="card-header p-3">TAMBAH ADMINISTRATOR</h5>
+      <div class="card-body mt-3">
+        <form action="/tambah-adm" method="post">
+          <div class="row mb-3">
+            <label for="nama" class="col-sm-2 col-form-label">Nama Lengkap</label>
+            <div class="col-sm-10">
+              <input type="text" name="nama" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="nip" class="col-sm-2 col-form-label">Nomor Induk Pegawai (NIP)</label>
+            <div class="col-sm-10">
+              <input type="text" name="nip" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="email" class="col-sm-2 col-form-label">Email</label>
+            <div class="col-sm-10">
+              <input type="email" name="email" class="form-control" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-success">Simpan</button>
+          <button class="btn btn-warning" type="reset"> Reset</button>
+          <a class="btn btn-danger" href="/administrator"> Batal</a>
+        </form>
       </div>
-      <div class="row mb-3">
-        <label for="nip" class="col-sm-2 col-form-label">Nomor Induk Pegawai (NIP)</label>
-        <div class="col-sm-10">
-          <input type="text" name="nip" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="email" class="col-sm-2 col-form-label">Email</label>
-        <div class="col-sm-10">
-          <input type="email" name="email" class="form-control" required>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-success">Simpan</button>
-      <button class="btn btn-warning" type="reset"> Reset</button>
-      <a class="btn btn-danger" href="/administrator"> Batal</a>
-    </form>
-
+    </div>
   </div>
     
     <script src="/bootstrap/js/bootstrap.min.js"></script>
