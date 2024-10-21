@@ -9,42 +9,44 @@
 </head>
 <body>
   <div class="container">
-    <form action="/tambah" method="post" enctype="multipart/form-data">
+    <form action="/tambah-absensi" method="post">
       <h3 class="mt-5">TAMBAH ABSENSI</h3>
       <div class="row mb-3">
         <label for="nama" class="col-sm-2 col-form-label">Nama Mahasiswa</label>
         <div class="col-sm-10">
-          <select class="form-select">
-            <option value="1">One</option>
-            <option value="2">Two</option>
-            <option value="3">Three</option>
+          <select name="id_mhs" class="form-select" required>
+            <option value="">Pilih Mahasiswa</option>
+            <% mahasiswa.forEach((mhs) => { %>
+              <option value="<% mhs.id %>"><%= mhs.nama %></option>
+            <% }) %>
           </select>
         </div>
       </div>
       <div class="row mb-3">
         <label for="status" class="col-sm-2 col-form-label">Status</label>
         <div class="col-sm-10">
-          <select class="form-select">
-            <option value="1">Hadir</option>
-            <option value="2">Izin</option>
-            <option value="3">Sakit</option>
+          <select name="status" class="form-select" required>
+            <option value="Hadir">Hadir</option>
+            <option value="Izin">Izin</option>
+            <option value="Sakit">Sakit</option>
+            <option value="Tidak Hadir">Tidak Hadir</option>
           </select>
         </div>
       </div>
       <div class="row mb-3">
-        <label for="tanggal" class="col-sm-2 col-form-label">Tanggal Absensi</label>
+        <label for="tanggals" class="col-sm-2 col-form-label">Tanggal Absensi</label>
         <div class="col-sm-10">
-          <input type="date" name="tanggal" class="form-control" required>
+          <input type="date" name="tanggals" class="form-control" required>
         </div>
       </div>
       <div class="row mb-3">
-        <label for="waktu" class="col-sm-2 col-form-label">Waktu Absensi</label>
+        <label for="waktus" class="col-sm-2 col-form-label">Waktu Absensi</label>
         <div class="col-sm-10">
-          <input type="time" name="waktu" class="form-control" required>
+          <input type="time" name="waktus" class="form-control" required>
         </div>
       </div>
       <div class="row mb-3">
-        <label for="alasan" class="col-sm-2 col-form-label">Alasan</label>
+        <label for="alasan" class="col-sm-2 col-form-label">Keterangan</label>
         <div class="col-sm-10">
           <input type="text" name="alasan" class="form-control" required>
         </div>

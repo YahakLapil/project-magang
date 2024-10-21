@@ -72,18 +72,20 @@
                       </tr>
                   </thead>
                   <tbody>
+                    <% absensi.forEach((item, index) => { %>
                       <tr>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row"></th>
-                          <th scope="row">
-                            <a href="/mulai-absen" class="btn btn-success bi-clock-fill"> Absensi</a>
-                            <a href="" class="btn btn-primary bi-file-text-fill"> Cetak</a>
+                          <th scope="row"><%= index + 1 %></th>
+                          <td><%= item.nama %></td>
+                          <td><%= item.univ %></td>
+                          <td><%= item.status %></td>
+                          <td><%= item.waktu %></td>
+                          <td><%= item.hari %></td>
+                          <td><%= moment(item.tanggal).format('DD-MM-YYYY') %></td>
+                          <td>
+                              <a href="" class="btn btn-primary bi-file-text-fill"> Cetak</a>
+                          </td>
                       </tr>
+                    <% }) %>
                   </tbody>
               </table>
           </div>
