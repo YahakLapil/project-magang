@@ -8,32 +8,37 @@
 </head>
 <body>
     <div class="container">
-        <form action="/update-kegiatan/<%= kegiatanData.id %>" method="post">
-            <div class="mb-3">
-                <label for="hari" class="form-label">Hari</label>
-                <input type="text" class="form-control" id="hari" name="hari" value="<%= kegiatanData.hari %>" required>
+        <div class="card mt-5 mb-5">
+            <h5 class="card-header p-3">EDIT KEGIATAN</h5>
+            <div class="card-body mt-3">
+                <form action="/update-kegiatan/<%= kegiatanData.id %>" method="post">
+                    <div class="mb-3">
+                        <label for="hari" class="form-label">Hari</label>
+                        <input type="text" class="form-control" id="hari" name="hari" value="<%= kegiatanData.hari %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" value="<%= moment(kegiatanData.tanggal).format('YYYY-MM-DD') %>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jam" class="form-label">Jam</label>
+                        <% const jamArray = kegiatanData.jam.split(', '); %>
+                        <% jamArray.forEach((jam, index) => { %>
+                            <input type="text" class="form-control mb-2" id="jam-<%= index + 1 %>" name="jam-<%= index + 1 %>" value="<%= jam %>" required>
+                        <% }) %>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kegiatan" class="form-label">Kegiatan</label>
+                        <% const kegiatanArray = kegiatanData.kegiatan.split(', '); %>
+                        <% kegiatanArray.forEach((kegiatan, index) => { %>
+                            <textarea class="form-control mb-2" id="kegiatan-<%= index + 1 %>" name="kegiatan-<%= index + 1 %>" rows="3" required><%= kegiatan %></textarea>
+                        <% }) %>
+                    </div>
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <a class="btn btn-danger" href="/data-kegiatan"> Batal</a>
+                </form>
             </div>
-            <div class="mb-3">
-                <label for="tanggal" class="form-label">Tanggal</label>
-                <input type="date" class="form-control" id="tanggal" name="tanggal" value="<%= moment(kegiatanData.tanggal).format('YYYY-MM-DD') %>" required>
-            </div>
-            <div class="mb-3">
-                <label for="jam" class="form-label">Jam</label>
-                <% const jamArray = kegiatanData.jam.split(', '); %>
-                <% jamArray.forEach((jam, index) => { %>
-                    <input type="text" class="form-control mb-2" id="jam-<%= index + 1 %>" name="jam-<%= index + 1 %>" value="<%= jam %>" required>
-                <% }) %>
-            </div>
-            <div class="mb-3">
-                <label for="kegiatan" class="form-label">Kegiatan</label>
-                <% const kegiatanArray = kegiatanData.kegiatan.split(', '); %>
-                <% kegiatanArray.forEach((kegiatan, index) => { %>
-                    <textarea class="form-control mb-2" id="kegiatan-<%= index + 1 %>" name="kegiatan-<%= index + 1 %>" rows="3" required><%= kegiatan %></textarea>
-                <% }) %>
-            </div>
-            <button type="submit" class="btn btn-success">Update</button>
-            <a class="btn btn-danger" href="/data-kegiatan"> Batal</a>
-        </form>
+        </div>
     </div> 
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

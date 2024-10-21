@@ -9,31 +9,35 @@
 </head>
 <body>
   <div class="container">
-    <form action="/tambah-kegiatan-mhs" method="post">
-      <h3 class="mt-5">TAMBAH KEGIATAN</h3>
-      <div class="row mb-3">
-        <label for="awal" class="col-sm-2 col-form-label">Waktu Awal Kegiatan</label>
-        <div class="col-sm-10">
-          <input type="time" name="awal" class="form-control" required>
-        </div>
+    <div class="card mt-5">
+      <h5 class="card-header p-3">TAMBAH KEGIATAN</h5>
+      <div class="card-body mt-3">
+        <form action="/tambah-kegiatan-mhs" method="post">
+          <div class="row mb-3">
+            <label for="awal" class="col-sm-2 col-form-label">Waktu Awal Kegiatan</label>
+            <div class="col-sm-10">
+              <input type="time" name="awal" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="akhir" class="col-sm-2 col-form-label">Waktu Akhir Kegiatan</label>
+            <div class="col-sm-10">
+              <input type="time" name="akhir" class="form-control" required>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="kegiatan" class="col-sm-2 col-form-label">Kegiatan</label>
+            <div class="col-sm-10">
+              <input type="text" name="kegiatan" class="form-control" required>
+            </div>
+          </div>
+          <input type="hidden" name="id_mahasiswa" value="<%= id_mahasiswa %>">
+          <input type="submit" class="btn btn-success" value="Simpan">
+          <button class="btn btn-warning" type="reset"> Reset</button>
+          <a class="btn btn-danger" href="/kegiatan"> Batal</a>
+        </form>
       </div>
-      <div class="row mb-3">
-        <label for="akhir" class="col-sm-2 col-form-label">Waktu Akhir Kegiatan</label>
-        <div class="col-sm-10">
-          <input type="time" name="akhir" class="form-control" required>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="kegiatan" class="col-sm-2 col-form-label">Kegiatan</label>
-        <div class="col-sm-10">
-          <input type="text" name="kegiatan" class="form-control" required>
-        </div>
-      </div>
-      <input type="hidden" name="id_mahasiswa" value="<%= id_mahasiswa %>">
-      <input type="submit" class="btn btn-success" value="Simpan">
-      <button class="btn btn-warning" type="reset"> Reset</button>
-      <a class="btn btn-danger" href="/kegiatan"> Batal</a>
-    </form>
+    </div>
   </div>
     
     <script src="/bootstrap/js/bootstrap.min.js"></script>
