@@ -59,13 +59,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
-                            <th scope="row"></th>
+                        <% absensi.forEach((item, index) => { %>
+                            <tr>
+                                <th scope="row"><%= index + 1 %></th>
+                                <td><%= item.hari %></td>
+                                <td><%= moment(item.tanggal).format('DD-MM-YYYY') %></td>
+                                <td><%= item.waktu %></td>
+                                <td><%= item.status %></td>
+                                <td><%= item.keterangan || 'Tidak ada' %></td>
+                            </tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
