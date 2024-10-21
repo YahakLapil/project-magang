@@ -508,7 +508,9 @@ db.connect((err) => {
           res.redirect("/login");
       } else {
           const sql = `
-              SELECT u.nama, u.univ, a.status, a.waktu, a.hari, a.tanggal
+              SELECT u.nama, u.univ, a.status,
+              IFNULL(a.waktu, '--.--') AS waktu,
+              a.hari, a.tanggal
               FROM absensi a
               INNER JOIN user u ON a.id_mhs = u.id
           `;
@@ -716,7 +718,55 @@ db.connect((err) => {
               res.status(400).send("Waktu untuk melakukan absensi sudah lewat");
           }
       });
-   });
+    });
+
+    app.post("/tambah-absensi1", (req, res) => {
+      const { id_mhs, status, tanggal, alasan } = req.body; // Ambil data dari body
+  
+      // Validasi input
+      if (!id_mhs || !status || !tanggal) {
+          return res.status(400).send("Semua field harus diisi.");
+      }
+  
+      const tanggals = moment(tanggal).format("YYYY-MM-DD"); // Format tanggal
+      const hari = moment(tanggals).format("dddd"); // Ambil nama hari dalam bahasa Inggris
+  
+      // Menerjemahkan nama hari ke dalam bahasa Indonesia
+      let hariIndo;
+      switch (hari) {
+          case "Monday": hariIndo = "Senin"; break;
+          case "Tuesday": hariIndo = "Selasa"; break;
+          case "Wednesday": hariIndo = "Rabu"; break;
+          case "Thursday": hariIndo = "Kamis"; break;
+          case "Friday": hariIndo = "Jumat"; break;
+          case "Saturday": hariIndo = "Sabtu"; break;
+          case "Sunday": hariIndo = "Minggu"; break;
+          default: hariIndo = hari; // Jika tidak dikenali, gunakan nama hari asli
+      }
+
+      // Validasi keterangan
+      let keterangan = null;
+      if (status === "Izin" || status === "Sakit") {
+          // Pastikan keterangan tidak kosong
+          if (!alasan || alasan.trim() === "") {
+              return res.status(400).send("Keterangan tidak boleh kosong untuk status 'Izin' atau 'Sakit'.");
+          }
+          keterangan = alasan; // Simpan keterangan
+      }
+
+      const insertSql = "INSERT INTO absensi (id_mhs, hari, tanggal, waktu, status, keterangan) VALUES (?, ?, ?, NULL, ?, ?)";
+    
+      // Melakukan query untuk memasukkan data absensi ke dalam database
+      db.query(insertSql, [id_mhs, hariIndo, tanggals, status, alasan], (err, result) => {
+          if (err) {
+              console.error("Error inserting attendance:", err);
+              return res.status(500).send("Error inserting attendance");
+          }
+          
+          // Setelah berhasil memasukkan data, redirect ke halaman data absensi
+          res.redirect("/data-absen");
+      });
+    });
 
     app.get("/check-absensi/:id_mhs", (req, res) => {
       const id_mhs = req.params.id_mhs;
@@ -778,7 +828,17 @@ db.connect((err) => {
           res.redirect("/login");
       } else {
           const userId = req.session.userId; // Ambil ID pengguna dari session
-          const sql = "SELECT * FROM absensi WHERE id_mhs = ?"; // Ambil data absensi berdasarkan ID mahasiswa
+          const sql = `
+              SELECT 
+                  id_mhs, 
+                  hari, 
+                  tanggal, 
+                  IFNULL(waktu, '--.--') AS waktu, 
+                  status, 
+                  keterangan 
+              FROM absensi 
+              WHERE id_mhs = ?
+          `; // Ambil data absensi berdasarkan ID mahasiswa
 
           db.query(sql, [userId], (err, result) => {
               if (err) throw err;
@@ -841,19 +901,46 @@ db.connect((err) => {
       }
     })
 
+    // // Route untuk menampilkan form tambah absensi
+    // app.get("/tambah-absen", (req, res) => {
+    //   if (!req.session.username) {
+    //       res.redirect("/login");
+    //   } else {
+    //       const sql = "SELECT id, nama FROM user"; // Ambil id dan nama mahasiswa dari tabel user
+    //       db.query(sql, (err, result) => {
+    //           if (err) throw err;
+    //           const mahasiswa = JSON.parse(JSON.stringify(result)); // Konversi hasil ke format JSON
+    //           res.render("tambah-absen", { mahasiswa: mahasiswa }); // Kirim data mahasiswa ke tampilan
+    //       });
+    //   }
+    // });
+    
     // Route untuk menampilkan form tambah absensi
-    app.get("/tambah-absen", (req, res) => {
-      if (!req.session.username) {
-          res.redirect("/login");
-      } else {
-          const sql = "SELECT id, nama FROM user"; // Ambil id dan nama mahasiswa dari tabel user
-          db.query(sql, (err, result) => {
-              if (err) throw err;
-              const mahasiswa = JSON.parse(JSON.stringify(result)); // Konversi hasil ke format JSON
-              res.render("tambah-absen", { mahasiswa: mahasiswa }); // Kirim data mahasiswa ke tampilan
-          });
-      }
+app.get("/tambah-absen", (req, res) => {
+  if (!req.session.username) {
+    return res.redirect("/login");
+  }
+
+  const sqlMahasiswa = "SELECT id, nama FROM user"; // Ambil semua mahasiswa
+
+  db.query(sqlMahasiswa, (err, mahasiswaResult) => {
+    if (err) throw err;
+
+    // Ambil id_mhs yang sudah ada di tabel absensi
+    const sqlAbsensi = "SELECT DISTINCT id_mhs FROM absensi";
+    db.query(sqlAbsensi, (err, absensiResult) => {
+      if (err) throw err;
+
+      // Mengubah hasil menjadi array id_mhs
+      const idMhsArray = absensiResult.map(row => row.id_mhs);
+
+      res.render("tambah-absen", {
+        mahasiswa: mahasiswaResult,
+        idMhsArray: idMhsArray // Kirim id_mhs yang sudah ada
+      });
     });
+  });
+});
 
     // tambah kegiatan
     app.get("/tambah-kegiatan", (req, res) => {
