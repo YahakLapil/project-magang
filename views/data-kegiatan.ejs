@@ -71,10 +71,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <% let index = 1; let increment = 1; %>
+                  <% let index = 1; %>
                   <% kegiatan.forEach((kegiatans) => { %>
                     <tr>
-                      <th scope="row"><%= kegiatans.id %></th>
+                      <th scope="row"><%= index++ %></th>
                       <th scope="row"><%= kegiatans.username %></th>
                       <th scope="row"><%= kegiatans.hari %></th>
                       <th scope="row"><%= moment(kegiatans.tanggal).format('DD-MM-YYYY') %></th>

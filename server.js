@@ -201,13 +201,36 @@ db.connect((err) => {
 
     // Delete database user
     app.get("/delete/:id", (req, res) => {
-      const deleteSql = "DELETE FROM user WHERE id = ?"
-      const id = req.params.id
-      db.query(deleteSql, id, (err, result) => {
-        if (err) throw err
-        res.redirect("/data-mhs")
-      })
-    })
+      const id = req.params.id;
+
+      // First, delete related records in the absensi table
+      const deleteAbsensiSql = "DELETE FROM absensi WHERE id_mhs = ?";
+      db.query(deleteAbsensiSql, [id], (err) => {
+          if (err) {
+              console.error("Error deleting absensi records:", err);
+              return res.status(500).send("Error deleting attendance records");
+          }
+
+          // Next, delete related records in the akun table
+          const deleteAkunSql = "DELETE FROM akun WHERE user_id = ?";
+          db.query(deleteAkunSql, [id], (err) => {
+              if (err) {
+                  console.error("Error deleting akun records:", err);
+                  return res.status(500).send("Error deleting account records");
+              }
+
+              // Finally, delete the user
+              const deleteUserSql = "DELETE FROM user WHERE id = ?";
+              db.query(deleteUserSql, [id], (err, result) => {
+                  if (err) {
+                      console.error("Error deleting user:", err);
+                      return res.status(500).send("Error deleting user");
+                  }
+                  res.redirect("/data-mhs");
+              });
+          });
+      });
+    });
 
     // Delete database administrator
     app.get("/delete-admin/:id", (req, res) => {
@@ -626,18 +649,34 @@ db.connect((err) => {
       }
     });
 
-    // Route untuk menyimpan pengaturan waktu absensi
     app.post("/simpan-pengaturan-absensi", (req, res) => {
       const { jam_buka, jam_tutup } = req.body;
-
+  
+      // Validasi jam buka dan jam tutup
       if (jam_buka >= jam_tutup) {
-        return res.render("pengaturan", { error: "Jam buka harus lebih awal dari jam tutup.", pengaturan: req.body, username: req.session.username });
-    }
-
-      const sql = "INSERT INTO pengaturan_absensi (jam_buka, jam_tutup) VALUES (?, ?) ON DUPLICATE KEY UPDATE jam_buka = ?, jam_tutup = ?";
-      db.query(sql, [jam_buka, jam_tutup, jam_buka, jam_tutup], (err, result) => {
+          return res.render("pengaturan", { error: "Jam buka harus lebih awal dari jam tutup.", pengaturan: req.body, username: req.session.username });
+      }
+  
+      const sqlCek = "SELECT COUNT(*) AS count FROM pengaturan_absensi"; // Cek apakah pengaturan sudah ada
+  
+      db.query(sqlCek, (err, result) => {
           if (err) throw err;
-          res.redirect("/pengaturan"); // Redirect setelah menyimpan pengaturan
+  
+          if (result[0].count > 0) {
+              // Jika pengaturan sudah ada, lakukan UPDATE
+              const sqlUpdate = "UPDATE pengaturan_absensi SET jam_buka = ?, jam_tutup = ?";
+              db.query(sqlUpdate, [jam_buka, jam_tutup], (err, result) => {
+                  if (err) throw err;
+                  res.redirect("/pengaturan"); // Redirect setelah menyimpan pengaturan
+              });
+          } else {
+              // Jika pengaturan belum ada, lakukan INSERT
+              const sqlInsert = "INSERT INTO pengaturan_absensi (jam_buka, jam_tutup) VALUES (?, ?)";
+              db.query(sqlInsert, [jam_buka, jam_tutup], (err, result) => {
+                  if (err) throw err;
+                  res.redirect("/pengaturan"); // Redirect setelah menyimpan pengaturan
+              });
+          }
       });
     });
 

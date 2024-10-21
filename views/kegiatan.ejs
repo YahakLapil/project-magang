@@ -59,10 +59,10 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% let index = 1; let increment = 1; %>
+                        <% let index = 1; %>
                         <% for (let kegiatann of kegiatan) { %>
                         <tr>
-                            <th scope="row"><%= kegiatann.id %></th>
+                            <th scope="row"><%= index++ %></th>
                             <th scope="row"><%= kegiatann.hari %></th>
                             <th scope="row"><%= moment(kegiatann.tanggal).format('DD-MM-YYYY') %></th>
                             <th scope="row">
@@ -74,7 +74,7 @@
                             <th scope="row">
                                 <% const kegiatan = kegiatann.kegiatan.split(', '); %>
                                 <% for (let i = 0; i < kegiatan.length; i++) { %>
-                                    <%= index++ %>. <%= kegiatan[i] %><br>
+                                    <%= i + 1 %>. <%= kegiatan[i] %><br>
                                 <% } %>
                             </th>
                         </tr>
