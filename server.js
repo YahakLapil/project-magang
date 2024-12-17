@@ -939,47 +939,33 @@ db.connect((err) => {
         })
       }
     })
-
-    // // Route untuk menampilkan form tambah absensi
-    // app.get("/tambah-absen", (req, res) => {
-    //   if (!req.session.username) {
-    //       res.redirect("/login");
-    //   } else {
-    //       const sql = "SELECT id, nama FROM user"; // Ambil id dan nama mahasiswa dari tabel user
-    //       db.query(sql, (err, result) => {
-    //           if (err) throw err;
-    //           const mahasiswa = JSON.parse(JSON.stringify(result)); // Konversi hasil ke format JSON
-    //           res.render("tambah-absen", { mahasiswa: mahasiswa }); // Kirim data mahasiswa ke tampilan
-    //       });
-    //   }
-    // });
     
     // Route untuk menampilkan form tambah absensi
-app.get("/tambah-absen", (req, res) => {
-  if (!req.session.username) {
-    return res.redirect("/login");
-  }
+    app.get("/tambah-absen", (req, res) => {
+      if (!req.session.username) {
+        return res.redirect("/login");
+      }
 
-  const sqlMahasiswa = "SELECT id, nama FROM user"; // Ambil semua mahasiswa
+      const sqlMahasiswa = "SELECT id, nama FROM user"; // Ambil semua mahasiswa
 
-  db.query(sqlMahasiswa, (err, mahasiswaResult) => {
-    if (err) throw err;
+      db.query(sqlMahasiswa, (err, mahasiswaResult) => {
+        if (err) throw err;
 
-    // Ambil id_mhs yang sudah ada di tabel absensi
-    const sqlAbsensi = "SELECT DISTINCT id_mhs FROM absensi";
-    db.query(sqlAbsensi, (err, absensiResult) => {
-      if (err) throw err;
+        // Ambil id_mhs yang sudah ada di tabel absensi
+        const sqlAbsensi = "SELECT DISTINCT id_mhs FROM absensi";
+        db.query(sqlAbsensi, (err, absensiResult) => {
+          if (err) throw err;
 
-      // Mengubah hasil menjadi array id_mhs
-      const idMhsArray = absensiResult.map(row => row.id_mhs);
+          // Mengubah hasil menjadi array id_mhs
+          const idMhsArray = absensiResult.map(row => row.id_mhs);
 
-      res.render("tambah-absen", {
-        mahasiswa: mahasiswaResult,
-        idMhsArray: idMhsArray // Kirim id_mhs yang sudah ada
+          res.render("tambah-absen", {
+            mahasiswa: mahasiswaResult,
+            idMhsArray: idMhsArray // Kirim id_mhs yang sudah ada
+          });
+        });
       });
     });
-  });
-});
 
     // tambah kegiatan
     app.get("/tambah-kegiatan", (req, res) => {
@@ -1103,8 +1089,8 @@ app.get("/tambah-absen", (req, res) => {
                 });
             });
         });
-    }
-});
+      }
+    });
     
     // tambah kegiatan mhs
     app.get("/tambah-kegiatan-mhs", (req, res) => {
